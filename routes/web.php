@@ -29,6 +29,10 @@ require __DIR__.'/auth.php';
 // Pengalihan route /dashboard bawaan Breeze langsung ke dashboard admin
 Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))->name('dashboard');
 
+// Alias pengalihan rute login agar pengguna tidak 404 saat mengakses /login atau /admin/login
+Route::redirect('/login', '/auth');
+Route::redirect('/admin/login', '/auth');
+
 // Panel admin (memerlukan login dan verifikasi ganti password)
 Route::middleware(['auth', 'force.password.change'])
     ->prefix('admin')
