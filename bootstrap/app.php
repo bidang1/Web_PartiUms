@@ -28,4 +28,17 @@ if (file_exists(dirname(__DIR__) . '/index.php') && (!isset($_SERVER['SCRIPT_FIL
     $app->usePublicPath(dirname(__DIR__));
 }
 
+// Ensure critical storage framework directories exist to prevent Blade InvalidArgumentException
+$storageDirs = [
+    dirname(__DIR__) . '/storage/framework/views',
+    dirname(__DIR__) . '/storage/framework/cache/data',
+    dirname(__DIR__) . '/storage/framework/sessions',
+    dirname(__DIR__) . '/storage/logs',
+];
+foreach ($storageDirs as $storageDir) {
+    if (!is_dir($storageDir)) {
+        @mkdir($storageDir, 0755, true);
+    }
+}
+
 return $app;
