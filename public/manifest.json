@@ -1,0 +1,30 @@
+{
+  "name": "PARTI 2026 - Himatif UMS",
+  "short_name": "PARTI 2026",
+  "description": "Website Resmi Parade Teknik Informatika (PARTI) 2026 - HIMATIF UMS",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0c0d0e",
+  "theme_color": "#e65100",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

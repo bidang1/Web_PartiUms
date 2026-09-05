@@ -1,0 +1,40 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=parti2026
+      - DB_USERNAME=parti_user
+      - DB_PASSWORD=parti_password
+    depends_on:
+      - db
+    networks:
+      - parti-network
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: parti2026
+      MYSQL_USER: parti_user
+      MYSQL_PASSWORD: parti_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - parti-db-data:/var/lib/mysql
+    networks:
+      - parti-network
+
+volumes:
+  parti-db-data:
+
+networks:
+  parti-network:
+    driver: bridge

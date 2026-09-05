@@ -1,0 +1,51 @@
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Block direct access to hidden files/folders (.git, .github, .agents, .env, etc.)
+    RewriteRule (^|/)\.(git|github|agents|env|dockerignore|editorconfig|gitattributes|npmrc) - [F,L]
+
+    # Block direct access to protected source directories and storage internals
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)(\/.*)?$ - [F,L]
+    RewriteRule ^storage\/(app|framework|logs)(\/.*)?$ - [F,L]
+
+    # Block direct access to sensitive files, database dumps, and configs
+    <FilesMatch "(?i)(^\.env|\.log$|composer\.(json|lock)|package(-lock)?\.json|\.sql$|\.lock$|\.md$|\.sh$|\.ya?ml$|\.example$|^artisan$|Dockerfile|docker-compose|phpunit\.xml|vite\.config\.(js|ts)|tailwind\.config\.js|postcss\.config\.js)">
+        <IfModule mod_authz_core.c>
+            Require all denied
+        </IfModule>
+        <IfModule !mod_authz_core.c>
+            Order allow,deny
+            Deny from all
+        </IfModule>
+    </FilesMatch>
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# HTTP Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+

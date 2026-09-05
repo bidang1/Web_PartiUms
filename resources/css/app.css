@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variabel CSS untuk Pengaturan Tema Warna (Light Mode & Dark Mode) */
+:root {
+    /* Palet Warna Mode Terang (Warm Luxury Ivory & Soft Gold Elevation) */
+    --color-paper: #F6F1E5;       /* Warm Rich Ivory/Champagne Background */
+    --color-paper-warm: #FFFFFF;  /* Pure Floating White Glass Card */
+    --color-ink: #1C1917;         /* Deep Warm Espresso Charcoal Text */
+    --color-ink-soft: #57534E;    /* Rich Stone Grey Muted Text */
+    --color-ember: #E65100;       /* Rich Warm Amber Accent */
+    --color-ember-dark: #B73E00;  /* Deep Warm Ember Accent */
+    --color-gold: #D97706;        /* Warm Polish Gold Accent */
+    --color-gold-soft: #FDE68A;   /* Soft Amber Highlight */
+    --color-line: rgba(180, 120, 50, 0.14); /* Warm Golden Line Border */
+    
+    /* Radial Glow Light (Rich Warm Sunburst Ambient Glow RGB) */
+    --radial-glow-1: 245, 158, 11;  /* Glow Warm Amber */
+    --radial-glow-2: 234, 88, 12;   /* Glow Warm Ember */
+}
+
+/* Palet Warna Mode Gelap (Pure OLED Black & Sharp Contrast) */
+.dark {
+    /* Mode Gelap: Warna Hitam Pekat (#000000) dan Teks Putih Tajam (#FFFFFF) */
+    --color-paper: #000000;       /* Pure Pitch OLED Black */
+    --color-paper-warm: #121215;  /* Deep Dark Glass Plate */
+    --color-ink: #FFFFFF;         /* Pure Bright White Text */
+    --color-ink-soft: #CCCCCC;    /* Sharp Silver-White Muted Text */
+    --color-ember: #FF851B;       /* Electric Ember Accent */
+    --color-ember-dark: #E06A0B;
+    --color-gold: #F5C842;        /* Polished Gold Accent */
+    --color-gold-soft: #FBE7A1;
+    --color-line: rgba(255, 255, 255, 0.20); /* High Contrast Sharp White Border */
+    
+    /* Radial glow dark (Pure White Ambient RGB) */
+    --radial-glow-1: 255, 255, 255;
+    --radial-glow-2: 255, 255, 255;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.06);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 10s ease-in-out infinite;
+}
+
+.transition-premium {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* utility to hide scrollbars */
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* macOS Aurora Gradient Background (Fluid & Dynamic) */
+.mac-aurora-bg {
+    background-color: var(--color-paper);
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(var(--radial-glow-2), 0.12), transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(var(--radial-glow-1), 0.16), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(var(--radial-glow-2), 0.08), transparent 40%);
+    background-size: 100% 100%;
+    transition: background-color 0.5s ease, background-image 0.5s ease;
+}
+
+.dark .mac-aurora-bg {
+    background-color: #000000;
+    background-image: 
+        radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.28), transparent 50%),
+        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.22), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12), transparent 45%);
+    background-size: 100% 100%;
+}
+
+/* iOS Glassmorphism Card Style */
+.ios-glass {
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    background-color: rgba(255, 255, 255, 0.90); /* Pure floating white glass card */
+    border: 1px solid rgba(180, 120, 50, 0.14);   /* Warm golden-bronze border */
+    box-shadow: 0 14px 35px -10px rgba(180, 100, 30, 0.07), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .ios-glass {
+    background-color: rgba(255, 255, 255, 0.04); /* Frosted dark glass plate matching sub-event detail cards */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* High contrast subtle border */
+    box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.ios-glass:hover {
+    transform: translateY(-4px);
+    background-color: #FFFFFF; /* High contrast brilliant white surface on hover */
+    border-color: rgba(230, 81, 0, 0.35); /* Subtle warm ember highlight */
+    box-shadow: 0 20px 40px -12px rgba(230, 81, 0, 0.14), 0 4px 12px -5px rgba(180, 100, 30, 0.08);
+}
+
+.dark .ios-glass:hover {
+    background-color: rgba(255, 255, 255, 0.08); /* Glowing frosted glass highlight on hover */
+    border-color: rgba(255, 255, 255, 0.35); /* Sharp white border on hover */
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.08);
+}
+
+/* macOS start screen reveal logo transitions */
+.reveal-logo {
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.8s ease-out, 
+                filter 0.8s ease-out;
+}
+.reveal-logo-hidden {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(4px);
+}
+.reveal-logo-visible {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+}
+
+.reveal-text {
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.8s ease-out, 
+                filter 0.8s ease-out;
+}
+.reveal-text-hidden {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+}
+.reveal-text-visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+}
+
+/* InfiniteGridMenu canvas styles */
+#infinite-grid-menu-canvas {
+    cursor: grab;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    outline: none;
+    background: transparent;
+}
+#infinite-grid-menu-canvas:active {
+    cursor: grabbing;
+}
+
+/* Animasi Logo Running Marquee (Tampilan Logo Sponsor Mengalir Ke Kiri) */
+@keyframes logoloop-scroll-left {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.animate-logoloop-left {
+    animation: logoloop-scroll-left 85s linear infinite;
+    will-change: transform;
+}
+
+.animate-logoloop-left-fast {
+    animation: logoloop-scroll-left 22s linear infinite;
+    will-change: transform;
+}
+
+.logoloop-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.logoloop-container:hover .animate-logoloop-left,
+.logoloop-container:hover .animate-logoloop-left-fast {
+    animation-play-state: paused;
+}
+
+.logoloop-fade-mask {
+    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+@media (max-width: 640px) {
+    .animate-logoloop-left {
+        animation-duration: 35s;
+    }
+    .animate-logoloop-left-fast {
+        animation-duration: 16s;
+    }
+    .logoloop-fade-mask {
+        mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-logoloop-left,
+    .animate-logoloop-left-fast {
+        animation: none !important;
+        transform: translate3d(0, 0, 0) !important;
+    }
+}
