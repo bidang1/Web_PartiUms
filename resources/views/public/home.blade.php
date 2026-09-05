@@ -101,7 +101,8 @@
             </div>
 
             <!-- Retro Terminal (Desktop Only) -->
-            <div class="hidden md:flex md:flex-col pointer-events-auto text-left w-full h-[400px] rounded-[20px] bg-[#0c0c0c] border border-gray-800 shadow-[0_0_40px_rgba(39,201,63,0.1)] overflow-hidden font-mono text-[13px] relative"
+            <div class="hidden md:flex flex-col pointer-events-auto text-left w-full h-[400px] rounded-[20px] bg-[#0c0c0c] border border-gray-800 shadow-[0_0_40px_rgba(39,201,63,0.1)] overflow-hidden font-mono text-[13px] relative"
+                style="display: flex; flex-direction: column;"
                 x-data="{
                     input: '',
                     output: [
@@ -145,18 +146,18 @@
                 @click="$refs.cmdInput.focus()"
             >
                 <!-- Top Bar -->
-                <div class="bg-[#1a1a1a] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-                    <div class="flex space-x-2">
+                <div class="w-full bg-[#1a1a1a] px-4 py-3 border-b border-gray-800 flex items-center justify-between shrink-0" style="width: 100%; display: flex; flex-direction: row;">
+                    <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
                         <div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
                         <div class="w-3 h-3 rounded-full bg-[#27C93F]"></div>
                     </div>
-                    <div class="text-gray-400 text-[10px] tracking-widest font-bold">GUEST@PARTI2026:~</div>
+                    <div class="text-gray-400 text-[10px] tracking-widest font-bold font-mono">GUEST@PARTI2026:~</div>
                     <div class="w-10"></div>
                 </div>
                 
                 <!-- Terminal Body -->
-                <div x-ref="terminalBody" class="p-5 flex-1 overflow-y-auto text-[#27C93F] font-mono flex flex-col gap-1 scrollbar-hide shadow-inner">
+                <div x-ref="terminalBody" class="p-5 flex-1 overflow-y-auto text-[#27C93F] font-mono flex flex-col gap-1 scrollbar-hide shadow-inner" style="min-height: 0; flex: 1; overflow-y: auto;">
                     <template x-for="(line, index) in output" :key="index">
                         <div class="whitespace-pre-wrap break-words" x-text="line"></div>
                     </template>
