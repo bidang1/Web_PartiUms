@@ -171,6 +171,11 @@ class SubEvent extends Model
             return $this->poster_path;
         }
 
-        return asset('storage/' . $this->poster_path);
+        $cleanPath = ltrim($this->poster_path, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $cleanPath = substr($cleanPath, 8);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 }

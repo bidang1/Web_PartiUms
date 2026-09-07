@@ -109,7 +109,12 @@ class Sponsor extends Model
             return $this->logo_path;
         }
 
-        return asset('storage/' . $this->logo_path);
+        $cleanPath = ltrim($this->logo_path, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $cleanPath = substr($cleanPath, 8);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 }
 

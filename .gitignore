@@ -26,6 +26,7 @@ Homestead.yaml
 Thumbs.db
 
 graphify-out/
+scratch/
 .phpunit.result.cache
 
 # Database Files

@@ -89,6 +89,17 @@ Route::middleware(['auth', 'force.password.change'])
                 Route::post('create-symlink', function () {
                     try {
                         \Illuminate\Support\Facades\Artisan::call('storage:link');
+
+                        // Jika flat-root deployment (folder storage di root sudah ada), buat symlink subfolder di dalam storage/
+                        $subFolders = ['posters', 'sponsors', 'documents'];
+                        foreach ($subFolders as $folder) {
+                            $target = storage_path('app/public/' . $folder);
+                            $link = base_path('storage/' . $folder);
+                            if (is_dir($target) && !file_exists($link) && !is_link($link)) {
+                                @symlink($target, $link);
+                            }
+                        }
+
                         return response()->json(['status' => 'success', 'message' => 'Storage symlink created successfully!']);
                     } catch (\Throwable $e) {
                         \Illuminate\Support\Facades\Log::error('Failed to create storage symlink: ' . $e->getMessage());
@@ -118,33 +129,54 @@ $mediaHandler = function ($path) {
         abort(404);
     }
     $cleanPath = ltrim($path, '/');
+    if (str_starts_with($cleanPath, 'storage/')) {
+        $cleanPath = substr($cleanPath, 8);
+    }
 
     // Protect draft or deleted sub-event documents from unauthenticated direct exposure
-    if (str_starts_with($cleanPath, 'sub-events/documents/')) {
+    if (str_starts_with($cleanPath, 'documents/') || str_starts_with($cleanPath, 'sub-events/documents/')) {
         $doc = \App\Models\SubEventDocument::where('file_path', $cleanPath)->with('subEvent')->first();
         if (!$doc || !$doc->subEvent || $doc->subEvent->status !== 'PUBLISHED' || $doc->subEvent->is_deleted) {
             abort(404);
         }
     }
 
-    // 1. Cek berkas di folder storage/app/public/
+    // 1. Cek berkas via Laravel Storage disk public (metode paling standar & teruji)
+    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath)) {
+        $storageDiskPath = \Illuminate\Support\Facades\Storage::disk('public')->path($cleanPath);
+        if (is_file($storageDiskPath)) {
+            return response()->file($storageDiskPath, [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
+    }
+
+    // 2. Cek berkas di folder storage/app/public/
     $baseStorage = realpath(storage_path('app/public'));
     $fullPath = storage_path('app/public/' . $cleanPath);
     $realFullPath = realpath($fullPath);
-    if ($baseStorage && $realFullPath && str_starts_with($realFullPath, $baseStorage) && is_file($realFullPath)) {
-        return response()->file($realFullPath, [
-            'Cache-Control' => 'public, max-age=31536000, immutable',
-        ]);
+    if ($baseStorage && $realFullPath) {
+        $normBase = rtrim(str_replace('\\', '/', $baseStorage), '/') . '/';
+        $normFull = str_replace('\\', '/', $realFullPath);
+        if (str_starts_with($normFull, $normBase) && is_file($realFullPath)) {
+            return response()->file($realFullPath, [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
     }
 
-    // 2. Cek berkas di folder public/storage/
+    // 3. Cek berkas di folder public/storage/ (fallback symlink atau folder statis)
     $basePublic = realpath(public_path('storage'));
     $publicPath = public_path('storage/' . $cleanPath);
     $realPublicPath = realpath($publicPath);
-    if ($basePublic && $realPublicPath && str_starts_with($realPublicPath, $basePublic) && is_file($realPublicPath)) {
-        return response()->file($realPublicPath, [
-            'Cache-Control' => 'public, max-age=31536000, immutable',
-        ]);
+    if ($basePublic && $realPublicPath) {
+        $normBasePublic = rtrim(str_replace('\\', '/', $basePublic), '/') . '/';
+        $normFullPublic = str_replace('\\', '/', $realPublicPath);
+        if (str_starts_with($normFullPublic, $normBasePublic) && is_file($realPublicPath)) {
+            return response()->file($realPublicPath, [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
     }
 
     abort(404);

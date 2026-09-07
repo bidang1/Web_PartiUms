@@ -28,12 +28,16 @@ if (file_exists(dirname(__DIR__) . '/index.php') && (!isset($_SERVER['SCRIPT_FIL
     $app->usePublicPath(dirname(__DIR__));
 }
 
-// Ensure critical storage framework directories exist to prevent Blade InvalidArgumentException
+// Ensure critical storage framework and upload directories exist
 $storageDirs = [
     dirname(__DIR__) . '/storage/framework/views',
     dirname(__DIR__) . '/storage/framework/cache/data',
     dirname(__DIR__) . '/storage/framework/sessions',
     dirname(__DIR__) . '/storage/logs',
+    dirname(__DIR__) . '/storage/app/public',
+    dirname(__DIR__) . '/storage/app/public/posters',
+    dirname(__DIR__) . '/storage/app/public/sponsors',
+    dirname(__DIR__) . '/storage/app/public/documents',
 ];
 foreach ($storageDirs as $storageDir) {
     if (!is_dir($storageDir)) {
