@@ -267,14 +267,18 @@
 
             <div class="grid grid-cols-1 {{ $itemCount === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : ($itemCount === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' : ($itemCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4')) }} gap-10 md:gap-8">
                 @foreach($timeline as $item)
-                <div class="relative pl-8 md:pl-0 z-10 flex flex-col items-start text-left group">
+                @php
+                    $desc = trim($item->description ?? '');
+                    $isLong = mb_strlen($desc) > 85;
+                @endphp
+                <div x-data="{ expanded: false }" class="relative pl-8 md:pl-0 z-10 flex flex-col items-start text-left group">
                     <!-- Apple-style minimal node dot -->
                     <div class="absolute left-0 top-[3px] md:relative md:top-auto md:left-auto w-[15px] h-[15px] rounded-full bg-paper border-[2px] border-ember/90 md:mb-6 z-10 transition-transform duration-200 group-hover:scale-125 shadow-sm flex items-center justify-center">
                         <span class="w-[5px] h-[5px] rounded-full bg-ember"></span>
                     </div>
 
                     <!-- Date Pill & Category -->
-                    <div class="flex items-center gap-2 mb-2.5">
+                    <div class="flex items-center gap-2 mb-2">
                         <span class="font-mono text-[11px] text-orange-600 dark:text-orange-400 font-semibold tracking-wider">
                             {{ $item->date ? $item->date->translatedFormat('d M Y') : 'TBD' }}
                         </span>
@@ -287,19 +291,34 @@
                     </div>
 
                     <!-- Event Title -->
-                    <h4 class="font-display text-[17px] sm:text-[18px] text-ink font-bold uppercase tracking-tight group-hover:text-ember transition-colors duration-200 mb-2 leading-snug">
+                    <h4 class="font-display text-[16px] sm:text-[17px] text-ink font-bold uppercase tracking-tight group-hover:text-ember transition-colors duration-200 mb-2 leading-snug">
                         {{ $item->title }}
                     </h4>
 
-                    <!-- Concise Description: Line-clamped to prevent wall of text -->
-                    <p class="text-[13px] text-ink-soft/90 leading-relaxed font-normal line-clamp-3 md:line-clamp-4 pr-2 mb-3">
-                        {{ $item->description }}
-                    </p>
+                    <!-- Concise Description: Default pendek, klik untuk baca selengkapnya -->
+                    <div class="text-[13px] text-ink-soft/90 leading-relaxed font-normal pr-1 mb-2">
+                        @if($isLong)
+                            <p x-show="!expanded" class="line-clamp-2">
+                                {{ $desc }}
+                            </p>
+                            <p x-show="expanded" x-cloak class="whitespace-pre-line">
+                                {{ $desc }}
+                            </p>
+                            <button type="button"
+                                @click="expanded = !expanded"
+                                class="inline-flex items-center gap-1 text-[11.5px] font-mono text-ember hover:text-ember-dark underline underline-offset-2 cursor-pointer focus:outline-none mt-1 py-0.5"
+                                :aria-expanded="expanded.toString()">
+                                <span x-text="expanded ? 'Tutup' : 'Baca lengkap'"></span>
+                            </button>
+                        @else
+                            <p class="whitespace-pre-line">{{ $desc }}</p>
+                        @endif
+                    </div>
 
                     <!-- Subtle Action Link (if linked to a sub-event) -->
                     @if($item->subEvent)
                     <a href="{{ route('sub-event.show', $item->subEvent->slug) }}"
-                       class="inline-flex items-center gap-1 text-[11.5px] font-mono font-medium text-ember hover:text-ember-dark transition-colors py-1 focus:outline-none focus:underline mt-auto">
+                       class="inline-flex items-center gap-1 text-[11.5px] font-mono font-medium text-ink-soft hover:text-ember transition-colors py-1 focus:outline-none focus:underline mt-auto">
                         <span>Lihat detail</span>
                         <span aria-hidden="true">&rarr;</span>
                     </a>
