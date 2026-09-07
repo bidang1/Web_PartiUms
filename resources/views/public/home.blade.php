@@ -241,10 +241,11 @@
     </div>
 </section>
 
-<section class="py-6 px-4 max-w-[1140px] mx-auto z-10 relative mb-12" id="timeline">
-    <div class="ios-glass rounded-[32px] p-6 sm:p-8 md:p-12">
-        <div class="mb-10 md:mb-14">
-            <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink flex items-center justify-center md:justify-start gap-2.5 before:content-[''] before:w-[20px] before:h-[1px] before:bg-ember font-bold">
+<section class="py-10 px-4 max-w-[1140px] mx-auto z-10 relative mb-12" id="timeline">
+    <div class="ios-glass rounded-[32px] p-8 md:p-14">
+        <!-- Section Header Minimalist -->
+        <div class="mb-12 md:mb-16">
+            <span class="font-mono text-[11px] tracking-[0.25em] uppercase text-ink flex items-center justify-center md:justify-start gap-3 before:content-[''] before:w-[24px] before:h-[1px] before:bg-ember font-bold">
                 TIMELINE PARTI {{ session('active_year', config('parti.active_year', 2026)) }}
             </span>
         </div>
@@ -254,85 +255,61 @@
         @endphp
 
         @if($itemCount > 0)
-        <!-- Timeline Container: Adaptif desktop grid & mobile vertical stepper -->
-        <div class="relative grid grid-cols-1 {{ $itemCount === 1 ? 'md:grid-cols-1 max-w-xl mx-auto' : ($itemCount === 2 ? 'md:grid-cols-2' : ($itemCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4')) }} gap-8 md:gap-6">
-            
-            <!-- Garis horizontal desktop: hanya membentang di dalam batas kolom terisi -->
+        <!-- Timeline Flow: Ultra Minimal Line Track -->
+        <div class="relative">
+            <!-- Continuous line across desktop nodes -->
             @if($itemCount > 1)
-            <div class="hidden md:block absolute top-2 left-[12.5%] right-[12.5%] h-[2px] bg-line/60 dark:bg-white/10 z-0 pointer-events-none"></div>
+            <div class="hidden md:block absolute top-[11px] left-[5%] right-[5%] h-[1px] bg-line/80 dark:bg-white/15 z-0 pointer-events-none"></div>
             @endif
 
-            <!-- Garis vertikal mobile yang menyambung di sisi kiri -->
-            <div class="block md:hidden absolute top-3 bottom-8 left-[17px] w-[2px] bg-line/60 dark:bg-white/10 z-0 pointer-events-none"></div>
+            <!-- Continuous line down mobile nodes -->
+            <div class="block md:hidden absolute top-3 bottom-6 left-[7px] w-[1px] bg-line/80 dark:bg-white/15 z-0 pointer-events-none"></div>
 
-            @foreach($timeline as $item)
-            <div class="relative pl-11 md:pl-0 z-10 flex flex-col items-start text-left h-full">
-                <!-- Bullet indicator -->
-                <div class="absolute left-[9px] top-1 md:relative md:top-auto md:left-auto md:mx-auto w-4 h-4 rounded-full bg-paper border-2 border-ember md:mb-5 z-20 transition-transform duration-200 hover:scale-110 shadow-sm flex items-center justify-center">
-                    <span class="w-1.5 h-1.5 rounded-full bg-ember"></span>
-                </div>
+            <div class="grid grid-cols-1 {{ $itemCount === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : ($itemCount === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' : ($itemCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4')) }} gap-10 md:gap-8">
+                @foreach($timeline as $item)
+                <div class="relative pl-8 md:pl-0 z-10 flex flex-col items-start text-left group">
+                    <!-- Apple-style minimal node dot -->
+                    <div class="absolute left-0 top-[3px] md:relative md:top-auto md:left-auto w-[15px] h-[15px] rounded-full bg-paper border-[2px] border-ember/90 md:mb-6 z-10 transition-transform duration-200 group-hover:scale-125 shadow-sm flex items-center justify-center">
+                        <span class="w-[5px] h-[5px] rounded-full bg-ember"></span>
+                    </div>
 
-                <!-- Card container untuk menjaga volume dan hierarki agenda -->
-                <div x-data="{ expanded: false }" class="w-full flex-1 flex flex-col bg-paper-warm/30 dark:bg-white/[0.03] border border-line/50 dark:border-white/10 rounded-2xl p-5 sm:p-6 transition-all duration-200 hover:border-ember/40">
-                    <!-- Tanggal Agenda -->
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <span class="font-mono text-[11px] text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider">
+                    <!-- Date Pill & Category -->
+                    <div class="flex items-center gap-2 mb-2.5">
+                        <span class="font-mono text-[11px] text-orange-600 dark:text-orange-400 font-semibold tracking-wider">
                             {{ $item->date ? $item->date->translatedFormat('d M Y') : 'TBD' }}
                         </span>
-
                         @if($item->subEvent)
-                        <span class="text-[10px] font-mono text-ink-soft/70 uppercase tracking-wider truncate max-w-[120px]" title="{{ $item->subEvent->name }}">
+                        <span class="text-ink-soft/40 text-[11px]">•</span>
+                        <span class="font-mono text-[10px] text-ink-soft/70 uppercase tracking-wider">
                             {{ $item->subEvent->type ?? 'Sub-Event' }}
                         </span>
                         @endif
                     </div>
 
-                    <!-- Judul Agenda -->
-                    <h4 class="font-display text-[16px] sm:text-[17px] mb-2 text-ink font-bold uppercase tracking-tight leading-snug">
+                    <!-- Event Title -->
+                    <h4 class="font-display text-[17px] sm:text-[18px] text-ink font-bold uppercase tracking-tight group-hover:text-ember transition-colors duration-200 mb-2 leading-snug">
                         {{ $item->title }}
                     </h4>
 
-                    <!-- Deskripsi dengan kontrol ekspansi teks agar tidak merusak ritme visual -->
-                    @php
-                        $desc = trim($item->description ?? '');
-                        $isLong = mb_strlen($desc) > 130;
-                    @endphp
+                    <!-- Concise Description: Line-clamped to prevent wall of text -->
+                    <p class="text-[13px] text-ink-soft/90 leading-relaxed font-normal line-clamp-3 md:line-clamp-4 pr-2 mb-3">
+                        {{ $item->description }}
+                    </p>
 
-                    <div class="text-[13px] text-ink-soft leading-relaxed flex-1">
-                        @if($isLong)
-                            <p x-show="!expanded" class="line-clamp-3">
-                                {{ $desc }}
-                            </p>
-                            <p x-show="expanded" x-cloak class="whitespace-pre-line">
-                                {{ $desc }}
-                            </p>
-                            <button type="button"
-                                @click="expanded = !expanded"
-                                class="mt-2 text-[12px] font-mono font-semibold text-ember hover:text-ember-dark underline underline-offset-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ember/40 rounded py-1"
-                                :aria-expanded="expanded.toString()">
-                                <span x-text="expanded ? 'Sembunyikan' : 'Baca Selengkapnya'"></span>
-                            </button>
-                        @else
-                            <p class="whitespace-pre-line">{{ $desc }}</p>
-                        @endif
-                    </div>
-
-                    <!-- Tombol langsung ke detail sub-event bila terhubung -->
+                    <!-- Subtle Action Link (if linked to a sub-event) -->
                     @if($item->subEvent)
-                    <div class="pt-4 mt-4 border-t border-line/40 dark:border-white/5 flex items-center justify-between">
-                        <a href="{{ route('sub-event.show', $item->subEvent->slug) }}"
-                           class="inline-flex items-center gap-1.5 text-[12px] font-mono font-semibold text-ink hover:text-ember transition-colors py-1 focus:outline-none focus:ring-2 focus:ring-ember/40 rounded">
-                            <span>Detail {{ $item->subEvent->name }}</span>
-                            <span aria-hidden="true">&rarr;</span>
-                        </a>
-                    </div>
+                    <a href="{{ route('sub-event.show', $item->subEvent->slug) }}"
+                       class="inline-flex items-center gap-1 text-[11.5px] font-mono font-medium text-ember hover:text-ember-dark transition-colors py-1 focus:outline-none focus:underline mt-auto">
+                        <span>Lihat detail</span>
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
                     @endif
                 </div>
+                @endforeach
             </div>
-            @endforeach
         </div>
         @else
-        <!-- Empty state jika belum ada agenda -->
+        <!-- Minimal empty state -->
         <div class="py-12 text-center">
             <p class="font-mono text-ink-soft uppercase text-[11px] tracking-widest">
                 Timeline pelaksanaan PARTI {{ session('active_year', config('parti.active_year', 2026)) }} belum diumumkan.
