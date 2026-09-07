@@ -35,16 +35,7 @@ class SubEventController extends Controller
             'htm_tiers' => [
                 'nullable',
                 'string',
-                function ($attribute, $value, $fail) {
-                    $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $value))));
-                    foreach ($lines as $line) {
-                        $parts = explode(':', $line, 2);
-                        if (count($parts) < 2 || trim($parts[0]) === '' || !is_numeric(trim($parts[1]))) {
-                            $fail('Format HTM Tiket harus berupa "NamaKategori:Harga" per baris (contoh: Presale:20000).');
-                            return;
-                        }
-                    }
-                }
+                $this->validateHtmTiersRule(),
             ],
             'order' => ['required', 'integer', 'min:0'],
             'type' => ['required', 'in:ONLINE,OFFLINE,HYBRID'],
@@ -60,20 +51,8 @@ class SubEventController extends Controller
             $pjNames = array_filter(array_map('trim', explode(',', $validated['pj_names'])));
         }
 
-        // Parse HTM Tiers (label:price per line)
-        $htmTiers = [];
-        if (!empty($validated['htm_tiers'])) {
-            $lines = explode("\n", str_replace("\r", "", $validated['htm_tiers']));
-            foreach ($lines as $line) {
-                $parts = explode(':', $line, 2);
-                if (count($parts) === 2) {
-                    $htmTiers[] = [
-                        'label' => trim($parts[0]),
-                        'price' => (int) trim($parts[1]),
-                    ];
-                }
-            }
-        }
+        // Parse HTM Tiers
+        $htmTiers = $this->parseHtmTiers($validated['htm_tiers'] ?? null);
 
         $posterPath = null;
         if ($request->hasFile('poster')) {
@@ -117,7 +96,15 @@ class SubEventController extends Controller
         if ($subEvent->htm_tiers) {
             $tierLines = [];
             foreach ($subEvent->htm_tiers as $tier) {
-                $tierLines[] = $tier['label'] . ':' . $tier['price'];
+                $price = $tier['price'] ?? null;
+                $priceLower = strtolower((string)$price);
+                if (in_array($priceLower, ['coming_soon', 'coming soon', 'comingsoon', 'tbd', 'tba', 'segera hadir', '-']) || $price === null) {
+                    $tierLines[] = $tier['label'] . ':Coming Soon';
+                } elseif ($price === 0 || $price === '0' || $priceLower === 'gratis') {
+                    $tierLines[] = $tier['label'] . ':Gratis';
+                } else {
+                    $tierLines[] = $tier['label'] . ':' . $price;
+                }
             }
             $htmTiersString = implode("\n", $tierLines);
         }
@@ -137,16 +124,7 @@ class SubEventController extends Controller
             'htm_tiers' => [
                 'nullable',
                 'string',
-                function ($attribute, $value, $fail) {
-                    $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $value))));
-                    foreach ($lines as $line) {
-                        $parts = explode(':', $line, 2);
-                        if (count($parts) < 2 || trim($parts[0]) === '' || !is_numeric(trim($parts[1]))) {
-                            $fail('Format HTM Tiket harus berupa "NamaKategori:Harga" per baris (contoh: Presale:20000).');
-                            return;
-                        }
-                    }
-                }
+                $this->validateHtmTiersRule(),
             ],
             'order' => ['required', 'integer', 'min:0'],
             'type' => ['required', 'in:ONLINE,OFFLINE,HYBRID'],
@@ -160,20 +138,8 @@ class SubEventController extends Controller
             $pjNames = array_filter(array_map('trim', explode(',', $validated['pj_names'])));
         }
 
-        // Parse HTM Tiers (label:price per line)
-        $htmTiers = [];
-        if (!empty($validated['htm_tiers'])) {
-            $lines = explode("\n", str_replace("\r", "", $validated['htm_tiers']));
-            foreach ($lines as $line) {
-                $parts = explode(':', $line, 2);
-                if (count($parts) === 2) {
-                    $htmTiers[] = [
-                        'label' => trim($parts[0]),
-                        'price' => (int) trim($parts[1]),
-                    ];
-                }
-            }
-        }
+        // Parse HTM Tiers
+        $htmTiers = $this->parseHtmTiers($validated['htm_tiers'] ?? null);
 
         $data = [
             'name' => $validated['name'],
@@ -261,6 +227,64 @@ class SubEventController extends Controller
         return redirect()->route('admin.sub-events.index')->with('success', 'Status sub acara ' . $subEvent->name . ' berhasil diperbarui.');
     }
 
+    /**
+     * Custom validation rule for HTM tiers (e.g. Early Bird:15000, Gelombang 1:Coming Soon, Umum:Gratis)
+     */
+    private function validateHtmTiersRule(): \Closure
+    {
+        return function ($attribute, $value, $fail) {
+            $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $value))));
+            foreach ($lines as $line) {
+                $parts = explode(':', $line, 2);
+                $label = trim($parts[0] ?? '');
+                if ($label === '') {
+                    $fail('Nama kategori HTM tidak boleh kosong.');
+                    return;
+                }
+                if (count($parts) === 2) {
+                    $priceRaw = strtolower(trim($parts[1]));
+                    $isComingSoon = in_array($priceRaw, ['coming soon', 'comingsoon', 'coming_soon', 'tbd', 'tba', 'segera hadir', '-']);
+                    $isFree = in_array($priceRaw, ['gratis', 'free', '0']);
+                    $cleanNum = preg_replace('/[^0-9]/', '', $priceRaw);
+                    if (!$isComingSoon && !$isFree && empty($cleanNum)) {
+                        $fail('Format harga untuk "' . $label . '" harus berupa angka (contoh: 20000), "Coming Soon", atau "Gratis".');
+                        return;
+                    }
+                }
+            }
+        };
+    }
 
+    /**
+     * Parse HTM tiers string into structured array.
+     */
+    private function parseHtmTiers(?string $raw): array
+    {
+        $htmTiers = [];
+        if (!empty($raw)) {
+            $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $raw))));
+            foreach ($lines as $line) {
+                $parts = explode(':', $line, 2);
+                $label = trim($parts[0]);
+                $priceRaw = isset($parts[1]) ? trim($parts[1]) : 'Coming Soon';
+                $priceLower = strtolower($priceRaw);
+
+                if (in_array($priceLower, ['coming soon', 'comingsoon', 'coming_soon', 'tbd', 'tba', 'segera hadir', '-', ''])) {
+                    $price = 'coming_soon';
+                } elseif (in_array($priceLower, ['gratis', 'free']) || $priceLower === '0') {
+                    $price = 0;
+                } else {
+                    $cleanNum = preg_replace('/[^0-9]/', '', $priceRaw);
+                    $price = !empty($cleanNum) ? (int) $cleanNum : 'coming_soon';
+                }
+
+                $htmTiers[] = [
+                    'label' => $label,
+                    'price' => $price,
+                ];
+            }
+        }
+        return $htmTiers;
+    }
 }
 

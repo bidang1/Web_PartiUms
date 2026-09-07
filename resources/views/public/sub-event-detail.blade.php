@@ -190,10 +190,18 @@
                                 <div class="flex justify-between items-center text-[13.5px] border-b border-line pb-1.5 last:border-0 last:pb-0">
                                     <span class="text-ink-soft font-mono">{{ $tier['label'] }}</span>
                                     <span class="font-semibold text-ink">
-                                        @if(empty($tier['price']) || $tier['price'] == 0)
+                                        @php
+                                            $rawPrice = $tier['price'] ?? '';
+                                            $lowerPrice = strtolower(trim((string)$rawPrice));
+                                            $isComingSoon = in_array($lowerPrice, ['coming_soon', 'coming soon', 'comingsoon', 'tbd', 'tba', 'segera hadir', '-']);
+                                            $isFree = empty($rawPrice) || $rawPrice === 0 || $rawPrice === '0' || $lowerPrice === 'gratis' || $lowerPrice === 'free';
+                                        @endphp
+                                        @if($isComingSoon)
+                                            <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">Coming Soon</span>
+                                        @elseif($isFree)
                                             Gratis
                                         @else
-                                            Rp {{ number_format($tier['price'], 0, ',', '.') }}
+                                            Rp {{ number_format((float)preg_replace('/[^0-9]/', '', (string)$rawPrice), 0, ',', '.') }}
                                         @endif
                                     </span>
                                 </div>

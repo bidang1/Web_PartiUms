@@ -80,8 +80,8 @@
                 <!-- HTM Tiers -->
                 <div class="md:col-span-2">
                     <label for="htm_tiers" class="block font-mono text-[11px] tracking-wider uppercase text-ink-soft mb-1.5 font-bold">Kategori HTM (Tiket Masuk)</label>
-                    <textarea id="htm_tiers" name="htm_tiers" rows="3" class="block w-full border border-line rounded-[2px] px-3.5 py-2.5 text-sm bg-paper-warm/20 focus:outline-none focus:border-ember focus:ring-1 focus:ring-ember transition-colors" placeholder="Format: NamaKategori:Harga (satu per baris)&#10;Contoh:&#10;Umum:50000&#10;VIP:100000">{{ old('htm_tiers', $htmTiersString) }}</textarea>
-                    <p class="text-[10px] text-ink-soft/60 mt-1">Kosongkan jika acara gratis. Gunakan format yang tepat agar harga tampil di halaman detail publik.</p>
+                    <textarea id="htm_tiers" name="htm_tiers" rows="3" class="block w-full border border-line rounded-[2px] px-3.5 py-2.5 text-sm bg-paper-warm/20 focus:outline-none focus:border-ember focus:ring-1 focus:ring-ember transition-colors" placeholder="Format: NamaKategori:Harga (satu per baris)&#10;Contoh:&#10;Early Bird:15000&#10;Gelombang 1:Coming Soon&#10;Gelombang 2:Coming Soon&#10;Umum:Gratis">{{ old('htm_tiers', $htmTiersString) }}</textarea>
+                    <p class="text-[10px] text-ink-soft/60 mt-1">Gunakan format <span class="font-mono font-semibold text-ink">NamaKategori:Harga</span> per baris. Isi harga dengan angka nominal (contoh: <span class="font-mono text-ink">15000</span>), <span class="font-mono text-ember font-semibold">Coming Soon</span> (jika belum ditentukan), atau <span class="font-mono text-emerald-600 font-semibold">Gratis</span>.</p>
                     <x-input-error :messages="$errors->get('htm_tiers')" class="mt-2 text-rose-600 text-xs" />
                 </div>
 
