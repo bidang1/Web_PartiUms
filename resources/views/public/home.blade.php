@@ -217,10 +217,17 @@
                 </span>
             </div>
 
-            <!-- Title & Description -->
-            <h3 class="font-display text-[19px] sm:text-[21px] mb-2 font-bold text-ink group-hover:text-ember transition-colors duration-200 uppercase tracking-tight">
-                {{ $subEvent->name }}
-            </h3>
+            <!-- Title & Action Indicator -->
+            <div class="flex items-start justify-between gap-3 mb-2">
+                <h3 class="font-display text-[19px] sm:text-[21px] font-bold text-ink group-hover:text-ember transition-colors duration-200 uppercase tracking-tight">
+                    {{ $subEvent->name }}
+                </h3>
+                <span class="card-arrow-btn" aria-hidden="true">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                </span>
+            </div>
             <p class="text-[13.5px] sm:text-[14px] text-ink-soft/90 leading-relaxed mb-6 font-normal">
                 {{ Str::limit($subEvent->description, 130) }}
             </p>

@@ -235,3 +235,46 @@
         transform: translate3d(0, 0, 0) !important;
     }
 }
+
+/* Interactive Card Arrow Indicator */
+.card-arrow-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-ink-soft);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .card-arrow-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.group:hover .card-arrow-btn {
+    color: var(--color-ember);
+    border-color: var(--color-ember);
+    background-color: rgba(230, 81, 0, 0.12);
+}
+
+.dark .group:hover .card-arrow-btn {
+    color: var(--color-ember);
+    border-color: var(--color-ember);
+    background-color: rgba(255, 133, 27, 0.16);
+}
+
+.card-arrow-btn svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .card-arrow-btn svg {
+    transform: translate(2px, -2px);
+}
+
