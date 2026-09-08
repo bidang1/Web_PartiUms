@@ -203,11 +203,15 @@
             <div class="flex items-center justify-between mb-4">
                 <span class="font-mono text-[11px] text-ink-soft">
                     @if($subEvent->date_start && $subEvent->date_end && $subEvent->date_start != $subEvent->date_end)
-                    {{ $subEvent->date_start->translatedFormat('j') }} - {{ $subEvent->date_end->translatedFormat('j M Y') }}
+                        @if($subEvent->date_start->format('m') !== $subEvent->date_end->format('m'))
+                            {{ $subEvent->date_start->translatedFormat('j M') }} - {{ $subEvent->date_end->translatedFormat('j M Y') }}
+                        @else
+                            {{ $subEvent->date_start->translatedFormat('j') }} - {{ $subEvent->date_end->translatedFormat('j M Y') }}
+                        @endif
                     @elseif($subEvent->date_start)
-                    {{ $subEvent->date_start->translatedFormat('j M Y') }}
+                        {{ $subEvent->date_start->translatedFormat('j M Y') }}
                     @else
-                    TBD
+                        TBD
                     @endif
                 </span>
 
