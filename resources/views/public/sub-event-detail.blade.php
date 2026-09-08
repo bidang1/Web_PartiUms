@@ -94,9 +94,28 @@
                     {{ $subEvent->tagline }}
                 </p>
                 @endif
-                <div class="text-ink-soft leading-relaxed text-[14px] sm:text-[14.5px] mt-4 pt-4 border-t border-line/50 max-w-[75ch]">
-                    {!! nl2br(e($subEvent->description)) !!}
+                @php
+                    $desc = trim($subEvent->description ?? '');
+                    $isLongDesc = mb_strlen($desc) > 160;
+                @endphp
+                @if($subEvent->description)
+                <div x-data="{ expanded: false }" class="text-ink-soft leading-relaxed text-[14px] sm:text-[14.5px] mt-4 pt-4 border-t border-line/50 max-w-[75ch]">
+                    @if($isLongDesc)
+                        <div :style="expanded ? '' : 'display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;'">
+                            {!! nl2br(e($subEvent->description)) !!}
+                        </div>
+                        <button type="button"
+                            @click="expanded = !expanded"
+                            class="inline-flex items-center gap-1.5 text-[12px] font-mono text-ember hover:text-ember-dark font-semibold mt-2.5 transition-colors focus:outline-none cursor-pointer">
+                            <span x-text="expanded ? 'Tutup ringkasan ↑' : 'Baca lengkap ↓'"></span>
+                        </button>
+                    @else
+                        <div>
+                            {!! nl2br(e($subEvent->description)) !!}
+                        </div>
+                    @endif
                 </div>
+                @endif
             </div>
 
             @php
