@@ -226,8 +226,8 @@
                 <h3 class="font-display text-[19px] sm:text-[21px] font-bold text-ink group-hover:text-ember transition-colors duration-200 uppercase tracking-tight">
                     {{ $subEvent->name }}
                 </h3>
-                <span class="card-arrow-btn" aria-hidden="true">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                <span class="card-arrow-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-line bg-black/5 dark:bg-white/10 dark:border-white/15 text-ink-soft shrink-0 transition-all duration-300 group-hover:border-ember group-hover:text-ember group-hover:bg-ember/10" aria-hidden="true" style="width: 2rem; height: 2rem; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style="width: 1rem; height: 1rem;" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
                     </svg>
                 </span>

@@ -1,7 +1,7 @@
 // Service Worker for PARTI 2026 PWA
 // ponytail: minimalist native Service Worker without external library dependencies
 
-const CACHE_NAME = 'parti-cache-v2';
+const CACHE_NAME = 'parti-cache-v3';
 const STATIC_ASSETS = [
     '/',
     '/offline.html',
