@@ -27,7 +27,7 @@
                     <tr class="bg-paper-warm/50 border-b border-line/60 font-mono text-[10px] tracking-wider text-ink-soft/70 uppercase">
                         <th class="px-6 py-4 w-16 text-center">Order</th>
                         <th class="px-6 py-4">Nama Acara</th>
-                        <th class="px-6 py-4">Pelaksanaan</th>
+                        <th class="px-6 py-4">Periode Pendaftaran</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4">Dokumen</th>
                         <th class="px-6 py-4 text-right">Aksi</th>

@@ -38,16 +38,16 @@
                     <x-input-error :messages="$errors->get('tagline')" class="mt-2 text-rose-600 text-xs" />
                 </div>
 
-                <!-- Date Start -->
+                <!-- Date Start (Registration Open) -->
                 <div>
-                    <label for="date_start" class="block font-mono text-[11px] tracking-wider uppercase text-ink-soft mb-1.5 font-bold">Tanggal Mulai</label>
+                    <label for="date_start" class="block font-mono text-[11px] tracking-wider uppercase text-ink-soft mb-1.5 font-bold">Tanggal Buka Pendaftaran</label>
                     <input id="date_start" name="date_start" type="date" value="{{ old('date_start', $subEvent->date_start ? $subEvent->date_start->format('Y-m-d') : '') }}" class="block w-full border border-line rounded-[2px] px-3.5 py-2.5 text-sm bg-paper-warm/20 focus:outline-none focus:border-ember focus:ring-1 focus:ring-ember transition-colors" />
                     <x-input-error :messages="$errors->get('date_start')" class="mt-2 text-rose-600 text-xs" />
                 </div>
 
-                <!-- Date End -->
+                <!-- Date End (Registration Close) -->
                 <div>
-                    <label for="date_end" class="block font-mono text-[11px] tracking-wider uppercase text-ink-soft mb-1.5 font-bold">Tanggal Selesai</label>
+                    <label for="date_end" class="block font-mono text-[11px] tracking-wider uppercase text-ink-soft mb-1.5 font-bold">Tanggal Tutup Pendaftaran</label>
                     <input id="date_end" name="date_end" type="date" value="{{ old('date_end', $subEvent->date_end ? $subEvent->date_end->format('Y-m-d') : '') }}" class="block w-full border border-line rounded-[2px] px-3.5 py-2.5 text-sm bg-paper-warm/20 focus:outline-none focus:border-ember focus:ring-1 focus:ring-ember transition-colors" />
                     <x-input-error :messages="$errors->get('date_end')" class="mt-2 text-rose-600 text-xs" />
                 </div>

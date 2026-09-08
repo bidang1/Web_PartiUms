@@ -168,7 +168,7 @@
             <!-- Event Details Checklist -->
             <div class="ios-glass rounded-[24px] p-6 sm:p-8 space-y-6 shadow-sm">
                 <div>
-                    <h5 class="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-soft font-bold mb-1.5">Pelaksanaan</h5>
+                    <h5 class="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-soft font-bold mb-1.5">Periode Pendaftaran</h5>
                     <p class="font-semibold text-[14px] sm:text-[14.5px] text-ink">
                         @if($subEvent->date_start)
                             @if($subEvent->date_end && $subEvent->date_start != $subEvent->date_end)
