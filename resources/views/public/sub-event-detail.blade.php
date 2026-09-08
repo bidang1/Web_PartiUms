@@ -289,7 +289,53 @@
                 </div>
             @endif
 
-            {{-- ponytail: merged event description into top hero card and deleted separate sheet --}}
+            <!-- Sub-Event Timeline Section -->
+            @if($subEvent->timelineItems->isNotEmpty())
+                <div class="ios-glass rounded-[24px] p-6 sm:p-8 text-left relative shadow-sm">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-line/50">
+                        <div>
+                            <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-ember font-bold block mb-1">Jadwal & Rundown</span>
+                            <h4 class="font-display font-bold text-[18px] sm:text-[20px] text-ink uppercase tracking-tight">
+                                Timeline {{ $subEvent->name }}
+                            </h4>
+                        </div>
+                        <span class="font-mono text-[11px] text-ink-soft bg-black/5 dark:bg-white/10 px-3 py-1 rounded-full border border-line">
+                            {{ $subEvent->timelineItems->count() }} Tahapan
+                        </span>
+                    </div>
+
+                    <!-- Vertical Timeline Track -->
+                    <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:top-2.5 before:bottom-2.5 before:left-[7px] before:w-[1.5px] before:bg-line/80 dark:before:bg-white/15">
+                        @foreach($subEvent->timelineItems as $item)
+                            <div class="relative group">
+                                <!-- Dot indicator centered on vertical track line -->
+                                <div class="absolute -left-[23px] top-[3px] w-[13px] h-[13px] rounded-full bg-paper border-2 border-ember transition-transform duration-200 group-hover:scale-125 flex items-center justify-center shadow-xs">
+                                    <span class="w-[4px] h-[4px] rounded-full bg-ember"></span>
+                                </div>
+
+                                <!-- Date -->
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-mono text-[11px] sm:text-[12px] text-orange-600 dark:text-orange-400 font-bold tracking-wider">
+                                        {{ $item->date ? $item->date->translatedFormat('d M Y') : 'TBD' }}
+                                    </span>
+                                </div>
+
+                                <!-- Milestone Title -->
+                                <h5 class="font-display text-[15px] sm:text-[16px] font-bold text-ink group-hover:text-ember transition-colors leading-snug">
+                                    {{ $item->title }}
+                                </h5>
+
+                                <!-- Milestone Description -->
+                                @if($item->description)
+                                    <p class="text-[13px] text-ink-soft/90 leading-relaxed mt-1 font-normal">
+                                        {{ $item->description }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <!-- Downloadable Documents Section as iOS Card -->
             @if($subEvent->documents->isNotEmpty())

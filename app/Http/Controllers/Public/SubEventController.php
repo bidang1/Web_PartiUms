@@ -15,9 +15,14 @@ class SubEventController extends Controller
         $subEvent = SubEvent::where('slug', $slug)
             ->published()
             ->notDeleted()
-            ->with(['documents' => function ($query) {
-                $query->orderBy('order');
-            }])
+            ->with([
+                'documents' => function ($query) {
+                    $query->orderBy('order');
+                },
+                'timelineItems' => function ($query) {
+                    $query->orderBy('date')->orderBy('order');
+                }
+            ])
             ->orderByRaw('CASE WHEN year = ? THEN 0 ELSE 1 END', [$year])
             ->firstOrFail();
 
