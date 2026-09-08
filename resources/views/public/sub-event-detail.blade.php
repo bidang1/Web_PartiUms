@@ -292,35 +292,23 @@
             <!-- Sub-Event Timeline Section -->
             @if($subEvent->timelineItems->isNotEmpty())
                 <div class="ios-glass rounded-[24px] p-6 sm:p-8 text-left relative shadow-sm">
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-line">
-                        <h4 class="font-display font-bold text-[18px] sm:text-[20px] text-ink uppercase tracking-tight">
-                            Timeline
-                        </h4>
-                        <span class="font-mono text-[11px] text-ink-soft bg-black/5 dark:bg-white/10 px-3 py-1 rounded-full border border-line">
-                            {{ $subEvent->timelineItems->count() }} Tahapan
-                        </span>
-                    </div>
+                    <h4 class="font-display font-bold text-[16px] text-ink uppercase tracking-wider mb-6">
+                        Timeline
+                    </h4>
 
-                    <!-- Vertical Timeline Nodes -->
-                    <div class="space-y-1">
+                    <div class="space-y-5">
                         @foreach($subEvent->timelineItems as $item)
-                            <div class="flex items-start gap-3.5 sm:gap-4 group">
-                                <!-- Dot & Vertical Connecting Line Column -->
-                                <div class="flex flex-col items-center self-stretch shrink-0 pt-1">
-                                    <div class="w-3.5 h-3.5 rounded-full bg-paper dark:bg-[#141414] border-2 border-ember flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-125">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-ember"></span>
-                                    </div>
-                                    @if(!$loop->last)
-                                        <div class="w-0.5 grow bg-line/80 dark:bg-white/15 my-1.5 min-h-[32px]"></div>
-                                    @endif
-                                </div>
-
-                                <!-- Content Column -->
-                                <div class="pb-6 flex-1">
-                                    <span class="font-mono text-[11px] sm:text-[12px] text-orange-600 dark:text-orange-400 font-bold tracking-wider block mb-1">
+                            <div class="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-6 {{ !$loop->last ? 'border-b border-line/40 pb-5' : '' }}">
+                                <!-- Date -->
+                                <div class="sm:w-32 shrink-0">
+                                    <span class="font-mono text-[12px] text-orange-600 dark:text-orange-400 font-semibold tracking-wider">
                                         {{ $item->date ? $item->date->translatedFormat('d M Y') : 'TBD' }}
                                     </span>
-                                    <h5 class="font-display text-[15px] sm:text-[16px] font-bold text-ink group-hover:text-ember transition-colors leading-snug">
+                                </div>
+
+                                <!-- Title & Description -->
+                                <div class="flex-1">
+                                    <h5 class="font-display text-[15px] sm:text-[15.5px] font-bold text-ink leading-snug">
                                         {{ $item->title }}
                                     </h5>
                                     @if($item->description)
