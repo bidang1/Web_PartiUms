@@ -146,43 +146,64 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body x-data="{
-          isPageLoaded: false,
-          showSplash: false,
+          isPageLoaded: (function() {
+              try { 
+                  const params = new URLSearchParams(window.location.search);
+                  if (params.has('splash')) return false;
+                  return !!sessionStorage.getItem('parti_splash_seen'); 
+              } catch (e) { return false; }
+          })(),
+          showSplash: (function() {
+              try { 
+                  const params = new URLSearchParams(window.location.search);
+                  if (params.has('splash')) return true;
+                  return !sessionStorage.getItem('parti_splash_seen'); 
+              } catch (e) { return false; }
+          })(),
           logoVisible: false,
           logoExiting: false,
           progress: 0,
           _interval: null,
           _done: false,
           init() {
-              const alreadySeen = (function() {
-                  try { return sessionStorage.getItem('parti_splash_seen'); } catch (e) { return null; }
-              })();
-
-              if (alreadySeen) {
-                  this.isPageLoaded = true;
-                  this.showSplash = false;
+              if (!this.showSplash) {
                   return;
               }
 
-              this.showSplash = true;
+              const startTime = Date.now();
+              const MIN_DISPLAY_TIME = 1600; // Minimal 1.6 detik agar animasi terlihat stabil & mewah
               this.startLoading();
 
-              // Failsafe timeout to prevent any freeze
+              // Trigger animasi kemunculan logo & teks setelah mount
+              setTimeout(() => {
+                  this.logoVisible = true;
+              }, 80);
+
+              const onComplete = () => {
+                  const elapsed = Date.now() - startTime;
+                  const remaining = Math.max(0, MIN_DISPLAY_TIME - elapsed);
+                  setTimeout(() => {
+                      this.finishLoading();
+                  }, remaining);
+              };
+
+              if (document.readyState === 'complete') {
+                  onComplete();
+              } else {
+                  window.addEventListener('load', onComplete, { once: true });
+              }
+
+              // Failsafe timeout agar tidak pernah freeze
               setTimeout(() => {
                   if (!this._done) this.finishLoading();
-              }, 1600);
+              }, 4000);
           },
           startLoading() {
               this._interval = setInterval(() => {
                   if (this.progress < 90) {
-                      this.progress = Math.min(90, this.progress + (90 - this.progress) * 0.15);
+                      this.progress = Math.min(90, Math.round(this.progress + (90 - this.progress) * 0.12 + 1));
                   }
               }, 40);
-              if (document.readyState === 'complete') {
-                  this.finishLoading();
-              } else {
-                  window.addEventListener('load', () => this.finishLoading());
-              }
           },
           finishLoading() {
               if (this._done) return;
@@ -191,10 +212,21 @@
               this.progress = 100;
               try { sessionStorage.setItem('parti_splash_seen', '1'); } catch (e) {}
 
-              setTimeout(() => { this.logoVisible = true; }, 150);
-              setTimeout(() => { this.logoExiting = true; }, 700);
-              setTimeout(() => { this.isPageLoaded = true; }, 900);
-              setTimeout(() => { this.showSplash = false; }, 1200);
+              // Urutan transisi keluar (exit sequence) yang elegan:
+              // 1. Logo mulai memudar lembut dan blur halus
+              setTimeout(() => { 
+                  this.logoExiting = true; 
+              }, 250);
+
+              // 2. Konten halaman utama mulai mengalir masuk (fade-in & slide-up)
+              setTimeout(() => { 
+                  this.isPageLoaded = true; 
+              }, 600);
+
+              // 3. Matikan kontainer splash secara menyeluruh
+              setTimeout(() => { 
+                  this.showSplash = false; 
+              }, 1100);
           }
       }"
       class="bg-paper text-ink font-body antialiased overflow-x-hidden mac-aurora-bg min-h-screen flex flex-col transition-colors duration-500">
@@ -223,6 +255,12 @@
                 <div class="flex items-center gap-2 mt-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-ember animate-ping"></span>
                     <span class="font-mono text-[9px] tracking-wider text-ink-soft/60 uppercase">System Initializing</span>
+                </div>
+
+                <!-- Minimal Smooth Progress Bar Track -->
+                <div class="w-36 h-1 bg-ink/10 dark:bg-white/10 rounded-full overflow-hidden mt-3">
+                    <div class="h-full bg-ember rounded-full transition-all duration-300 ease-out"
+                         :style="'width: ' + progress + '%'"></div>
                 </div>
             </div>
         </div>
