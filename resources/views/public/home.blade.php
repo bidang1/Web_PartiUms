@@ -111,14 +111,13 @@
                         ''
                     ],
                     commands: {
-                        'help': 'Available commands: help, about, version, date, clear, sudo',
-                        'version': 'PARTI 2026 Core Platform v1.0.0 (Codename: \'Vanguard\') - Hostinger Production Build\nEngineered & Crafted with precision by AtnanLabs (https://www.atnan.my.id/)',
+                        'help': 'Available commands: help, about, version, date, clear, sudo, credits',
+                        'version': 'PARTI 2026 Core Platform v1.0.0 - Hostinger Production Build\nOrganized by HIMATIF UMS',
                         'about': 'PARTI (Parade Teknik Informatika) is the biggest annual event by HIMATIF UMS. It is a hub for innovation, creativity, and technology collaboration.',
                         'date': new Date().toLocaleString(),
                         'sudo': 'Nice try, human. Access denied.',
-                        'whoami': 'Engineered & Crafted with passion by AtnanLabs (https://www.atnan.my.id/)',
-                        'atnanlabs': 'AtnanLabs - Vanguard of Web Engineering & Digital Experiences (https://www.atnan.my.id/)',
-                        'credits': 'Platform Engineering: AtnanLabs (https://www.atnan.my.id/) | Organizer: HIMATIF UMS'
+                        'whoami': 'Guest User @ PARTI 2026 Shell',
+                        'credits': 'Organizer: HIMATIF UMS (Universitas Muhammadiyah Surakarta)'
                     },
                     execute() {
                         const cmd = this.input.trim().toLowerCase();

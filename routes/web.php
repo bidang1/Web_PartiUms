@@ -228,8 +228,7 @@ Route::get('/sitemap.xml', function () {
 
 Route::get('/robots.txt', function () {
     $robots = "# --------------------------------------------------\n";
-    $robots .= "# PARTI 2026 Official Platform - v1.0.0 (Codename: Vanguard)\n";
-    $robots .= "# Engineered by AtnanLabs (https://www.atnan.my.id/)\n";
+    $robots .= "# PARTI 2026 Official Platform - HIMATIF UMS\n";
     $robots .= "# --------------------------------------------------\n\n";
     $robots .= "User-agent: *\n";
     $robots .= "Allow: /\n";
