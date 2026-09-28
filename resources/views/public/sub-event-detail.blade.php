@@ -206,21 +206,31 @@
                         <h5 class="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-soft font-bold mb-2">Harga Tiket Masuk (HTM)</h5>
                         <div class="space-y-2">
                             @foreach($subEvent->htm_tiers as $tier)
+                                @php
+                                    $rawPrice = $tier['price'] ?? '';
+                                    $lowerPrice = strtolower(trim((string)$rawPrice));
+                                    $normalizedPrice = str_replace([' ', '_', '-'], '', $lowerPrice);
+                                    $isSold = !empty($tier['is_sold_out']) || in_array($normalizedPrice, ['habis', 'soldout', 'soltout', 'tutup', 'closed']);
+                                    $isComingSoon = in_array($normalizedPrice, ['comingsoon', 'tbd', 'tba', 'segerahadir']);
+                                    $isFree = empty($rawPrice) || $rawPrice === 0 || $rawPrice === '0' || in_array($normalizedPrice, ['gratis', 'free']);
+                                    $cleanNum = (float)preg_replace('/[^0-9]/', '', (string)$rawPrice);
+                                @endphp
                                 <div class="flex justify-between items-center text-[13.5px] border-b border-line pb-1.5 last:border-0 last:pb-0">
-                                    <span class="text-ink-soft font-mono">{{ $tier['label'] }}</span>
-                                    <span class="font-semibold text-ink">
-                                        @php
-                                            $rawPrice = $tier['price'] ?? '';
-                                            $lowerPrice = strtolower(trim((string)$rawPrice));
-                                            $isComingSoon = in_array($lowerPrice, ['coming_soon', 'coming soon', 'comingsoon', 'tbd', 'tba', 'segera hadir', '-']);
-                                            $isFree = empty($rawPrice) || $rawPrice === 0 || $rawPrice === '0' || $lowerPrice === 'gratis' || $lowerPrice === 'free';
-                                        @endphp
-                                        @if($isComingSoon)
+                                    <span class="text-ink-soft font-mono {{ $isSold ? 'opacity-60' : '' }}">{{ $tier['label'] }}</span>
+                                    <span class="font-semibold text-ink flex items-center gap-2">
+                                        @if($isSold)
+                                            @if($cleanNum > 0)
+                                                <span class="line-through text-ink-soft/40 text-xs">Rp {{ number_format($cleanNum, 0, ',', '.') }}</span>
+                                            @endif
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                                Habis
+                                            </span>
+                                        @elseif($isComingSoon)
                                             <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">Coming Soon</span>
                                         @elseif($isFree)
                                             Gratis
                                         @else
-                                            Rp {{ number_format((float)preg_replace('/[^0-9]/', '', (string)$rawPrice), 0, ',', '.') }}
+                                            Rp {{ number_format($cleanNum, 0, ',', '.') }}
                                         @endif
                                     </span>
                                 </div>

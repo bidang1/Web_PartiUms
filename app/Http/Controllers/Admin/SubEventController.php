@@ -92,13 +92,19 @@ class SubEventController extends Controller
         // Format arrays back to strings for form editing
         $pjNamesString = $subEvent->pj_names ? implode(', ', $subEvent->pj_names) : '';
         
+        // ponytail: format HTM back to string with :HABIS flag if sold out
         $htmTiersString = '';
         if ($subEvent->htm_tiers) {
             $tierLines = [];
             foreach ($subEvent->htm_tiers as $tier) {
+                $isSold = !empty($tier['is_sold_out']) || (isset($tier['price']) && is_string($tier['price']) && in_array(strtolower(str_replace([' ', '_', '-'], '', $tier['price'])), ['habis', 'soldout', 'soltout', 'tutup', 'closed']));
                 $price = $tier['price'] ?? null;
-                $priceLower = strtolower((string)$price);
-                if (in_array($priceLower, ['coming_soon', 'coming soon', 'comingsoon', 'tbd', 'tba', 'segera hadir', '-']) || $price === null) {
+                $priceLower = strtolower(trim((string)$price));
+
+                if ($isSold) {
+                    $cleanNum = is_numeric($price) ? (int)$price : (int)preg_replace('/[^0-9]/', '', (string)$price);
+                    $tierLines[] = $cleanNum > 0 ? "{$tier['label']}:{$cleanNum}:HABIS" : "{$tier['label']}:HABIS";
+                } elseif (in_array($priceLower, ['coming_soon', 'coming soon', 'comingsoon', 'tbd', 'tba', 'segera hadir', '-']) || $price === null) {
                     $tierLines[] = $tier['label'] . ':Coming Soon';
                 } elseif ($price === 0 || $price === '0' || $priceLower === 'gratis') {
                     $tierLines[] = $tier['label'] . ':Gratis';
@@ -228,28 +234,41 @@ class SubEventController extends Controller
     }
 
     /**
-     * Custom validation rule for HTM tiers (e.g. Early Bird:15000, Gelombang 1:Coming Soon, Umum:Gratis)
+     * Custom validation rule for HTM tiers (e.g. Early Bird:15000, Gelombang 1:Coming Soon, Umum:Gratis, Presale:25000:HABIS)
+     * ponytail: support HABIS / SOLDOUT flags in 2-part and 3-part syntax
      */
     private function validateHtmTiersRule(): \Closure
     {
         return function ($attribute, $value, $fail) {
             $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $value))));
             foreach ($lines as $line) {
-                $parts = explode(':', $line, 2);
-                $label = trim($parts[0] ?? '');
+                $parts = array_map('trim', explode(':', $line));
+                $label = $parts[0] ?? '';
                 if ($label === '') {
                     $fail('Nama kategori HTM tidak boleh kosong.');
                     return;
                 }
                 if (count($parts) === 2) {
-                    $priceRaw = strtolower(trim($parts[1]));
-                    $isComingSoon = in_array($priceRaw, ['coming soon', 'comingsoon', 'coming_soon', 'tbd', 'tba', 'segera hadir', '-']);
+                    $priceRaw = strtolower(str_replace([' ', '_', '-'], '', $parts[1]));
+                    $isComingSoon = in_array($priceRaw, ['comingsoon', 'tbd', 'tba', 'segerahadir']);
                     $isFree = in_array($priceRaw, ['gratis', 'free', '0']);
-                    $cleanNum = preg_replace('/[^0-9]/', '', $priceRaw);
-                    if (!$isComingSoon && !$isFree && empty($cleanNum)) {
-                        $fail('Format harga untuk "' . $label . '" harus berupa angka (contoh: 20000), "Coming Soon", atau "Gratis".');
+                    $isSoldOut = in_array($priceRaw, ['habis', 'soldout', 'soltout', 'tutup', 'closed']);
+                    $cleanNum = preg_replace('/[^0-9]/', '', $parts[1]);
+                    if (!$isComingSoon && !$isFree && !$isSoldOut && empty($cleanNum)) {
+                        $fail('Format harga untuk "' . $label . '" harus berupa angka (contoh: 20000), "Coming Soon", "Gratis", atau "HABIS".');
                         return;
                     }
+                } elseif (count($parts) === 3) {
+                    $cleanNum = preg_replace('/[^0-9]/', '', $parts[1]);
+                    $statusRaw = strtolower(str_replace([' ', '_', '-'], '', $parts[2]));
+                    $isSoldOut = in_array($statusRaw, ['habis', 'soldout', 'soltout', 'tutup', 'closed']);
+                    if (empty($cleanNum) || !$isSoldOut) {
+                        $fail('Format tiga bagian untuk "' . $label . '" harus berupa "Kategori:Harga:HABIS" (contoh: Presale:25000:HABIS).');
+                        return;
+                    }
+                } else {
+                    $fail('Format baris untuk "' . $label . '" tidak valid. Gunakan format "Kategori:Harga" atau "Kategori:Harga:HABIS".');
+                    return;
                 }
             }
         };
@@ -257,6 +276,7 @@ class SubEventController extends Controller
 
     /**
      * Parse HTM tiers string into structured array.
+     * ponytail: parse HTM tiers with is_sold_out status support
      */
     private function parseHtmTiers(?string $raw): array
     {
@@ -264,24 +284,43 @@ class SubEventController extends Controller
         if (!empty($raw)) {
             $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $raw))));
             foreach ($lines as $line) {
-                $parts = explode(':', $line, 2);
-                $label = trim($parts[0]);
-                $priceRaw = isset($parts[1]) ? trim($parts[1]) : 'Coming Soon';
-                $priceLower = strtolower($priceRaw);
-
-                if (in_array($priceLower, ['coming soon', 'comingsoon', 'coming_soon', 'tbd', 'tba', 'segera hadir', '-', ''])) {
-                    $price = 'coming_soon';
-                } elseif (in_array($priceLower, ['gratis', 'free']) || $priceLower === '0') {
-                    $price = 0;
+                $parts = array_map('trim', explode(':', $line));
+                $label = $parts[0];
+                if (count($parts) === 3) {
+                    $cleanNum = preg_replace('/[^0-9]/', '', $parts[1]);
+                    $htmTiers[] = [
+                        'label' => $label,
+                        'price' => !empty($cleanNum) ? (int) $cleanNum : 0,
+                        'is_sold_out' => true,
+                    ];
                 } else {
-                    $cleanNum = preg_replace('/[^0-9]/', '', $priceRaw);
-                    $price = !empty($cleanNum) ? (int) $cleanNum : 'coming_soon';
-                }
+                    $priceRaw = isset($parts[1]) ? trim($parts[1]) : 'Coming Soon';
+                    $priceNormalized = strtolower(str_replace([' ', '_', '-'], '', $priceRaw));
 
-                $htmTiers[] = [
-                    'label' => $label,
-                    'price' => $price,
-                ];
+                    if (in_array($priceNormalized, ['habis', 'soldout', 'soltout', 'tutup', 'closed'])) {
+                        $htmTiers[] = [
+                            'label' => $label,
+                            'price' => 0,
+                            'is_sold_out' => true,
+                        ];
+                    } elseif (in_array($priceNormalized, ['comingsoon', 'tbd', 'tba', 'segerahadir', ''])) {
+                        $htmTiers[] = [
+                            'label' => $label,
+                            'price' => 'coming_soon',
+                        ];
+                    } elseif (in_array($priceNormalized, ['gratis', 'free', '0'])) {
+                        $htmTiers[] = [
+                            'label' => $label,
+                            'price' => 0,
+                        ];
+                    } else {
+                        $cleanNum = preg_replace('/[^0-9]/', '', $priceRaw);
+                        $htmTiers[] = [
+                            'label' => $label,
+                            'price' => !empty($cleanNum) ? (int) $cleanNum : 'coming_soon',
+                        ];
+                    }
+                }
             }
         }
         return $htmTiers;
