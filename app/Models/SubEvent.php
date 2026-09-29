@@ -178,4 +178,20 @@ class SubEvent extends Model
 
         return asset('storage/' . $cleanPath);
     }
+
+    /**
+     * Accessor for optimized OG image URL.
+     */
+    public function getOgImageUrlAttribute(): string
+    {
+        // ponytail: route to optimized lightweight JPEG (< 200KB) for WhatsApp & IG previews
+        if ($this->poster_path) {
+            if (str_starts_with($this->poster_path, 'http://') || str_starts_with($this->poster_path, 'https://')) {
+                return $this->poster_path;
+            }
+            return route('sub-event.og-image', $this->slug);
+        }
+
+        return asset('logo.png');
+    }
 }

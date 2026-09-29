@@ -5,7 +5,10 @@
 @section('meta_keywords', $subEvent->name . ', ' . ($subEvent->tagline ? $subEvent->tagline . ', ' : '') . 'PARTI 2026, HIMATIF UMS, lomba IT, kompetisi ' . $subEvent->type)
 @section('og_title', $subEvent->name . ' | PARTI ' . session('active_year', config('parti.active_year', 2026)))
 @section('og_description', $subEvent->tagline ?? Str::limit(strip_tags($subEvent->description ?? ''), 150))
-@section('og_image', $subEvent->poster_url ?? asset('logo.png'))
+@section('og_image', $subEvent->og_image_url)
+@section('og_image_type', $subEvent->poster_path ? 'image/jpeg' : 'image/png')
+@section('og_image_width', '800')
+@section('og_image_height', '1066')
 
 @section('structured_data')
 <script type="application/ld+json">
@@ -258,14 +261,21 @@
             </div>
 
             <!-- Share Event Card (Zero Purple) -->
-            <div class="ios-glass rounded-[24px] p-6 space-y-4 shadow-sm">
-                <h5 class="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-bold">Bagikan Acara</h5>
+            <div class="ios-glass rounded-[24px] p-6 space-y-4 shadow-sm" x-data="{ copied: false }">
+                <div class="flex items-center justify-between">
+                    <h5 class="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-bold">Bagikan Acara</h5>
+                    @if($subEvent->poster_path)
+                    <a href="{{ $subEvent->poster_url }}" download="Pamflet-{{ Str::slug($subEvent->name) }}" class="font-mono text-[10px] text-ember hover:underline font-bold flex items-center gap-1">
+                        ↓ Unduh Pamflet
+                    </a>
+                    @endif
+                </div>
                 <p class="text-[13px] text-ink-soft leading-relaxed">
                     Ajak rekan satu tim-mu untuk mendaftar dengan membagikan tautan acara ini.
                 </p>
                 <div class="flex flex-wrap gap-2.5">
                     <!-- WhatsApp -->
-                    <a href="https://api.whatsapp.com/send?text={{ rawurlencode($subEvent->name . ' | PARTI ' . session('active_year', config('parti.active_year', 2026)) . ': ' . request()->url()) }}" 
+                    <a href="https://api.whatsapp.com/send?text={{ rawurlencode($subEvent->name . ' | PARTI ' . session('active_year', config('parti.active_year', 2026)) . "\n" . request()->url()) }}" 
                        target="_blank" rel="noopener noreferrer" 
                        class="flex items-center justify-center w-9 h-9 rounded-full border border-line hover:border-emerald-500 hover:text-emerald-500 dark:hover:bg-emerald-500/10 text-ink-soft transition-all"
                        title="Bagikan ke WhatsApp">
@@ -291,21 +301,29 @@
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-.99.53-1.41.52-.46-.01-1.35-.26-2.01-.48-.81-.27-1.46-.42-1.4-.89.03-.25.38-.51 1.07-.78 4.2-1.83 7-3.04 8.4-3.63 4-.16 4.83.69 4.84.81z"/>
                         </svg>
                     </a>
+                    <!-- Native Mobile Share (IG Story / WA / Others) -->
+                    <button type="button" 
+                            x-show="'share' in navigator"
+                            @click="navigator.share({ title: '{{ addslashes($subEvent->name) }} | PARTI {{ session('active_year', config('parti.active_year', 2026)) }}', text: '{{ addslashes($subEvent->tagline ?? $subEvent->name) }}', url: '{{ request()->url() }}' })"
+                            class="flex items-center justify-center w-9 h-9 rounded-full border border-line text-ink-soft hover:border-pink-500 hover:text-pink-500 dark:hover:bg-pink-500/10 transition-all"
+                            title="Bagikan ke Aplikasi (Story IG / Status WA / Lainnya)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                    </button>
                     <!-- Copy Link -->
-                    <div x-data="{ copied: false }">
-                        <button @click="navigator.clipboard.writeText('{{ request()->url() }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
-                                class="flex items-center justify-center w-9 h-9 rounded-full border border-line text-ink-soft hover:bg-paper-warm transition-all"
-                                :class="copied ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10' : 'hover:border-ember hover:text-ember dark:hover:bg-white/[0.08]'"
-                                :title="copied ? 'Tautan disalin!' : 'Salin Tautan'">
-                            <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                            </svg>
-                            <svg x-show="copied" x-cloak class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </button>
-                    </div>
+                    <button @click="navigator.clipboard.writeText('{{ request()->url() }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
+                            class="flex items-center justify-center w-9 h-9 rounded-full border border-line text-ink-soft hover:bg-paper-warm transition-all"
+                            :class="copied ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10' : 'hover:border-ember hover:text-ember dark:hover:bg-white/[0.08]'"
+                            :title="copied ? 'Tautan disalin!' : 'Salin Tautan'">
+                        <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                        </svg>
+                        <svg x-show="copied" x-cloak class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -315,6 +333,16 @@
             @if($subEvent->poster_path)
                 <div class="ios-glass overflow-hidden rounded-[24px] p-4 transition-transform duration-500 hover:scale-[1.01]">
                     <img src="{{ $subEvent->poster_url }}" alt="Poster {{ $subEvent->name }}" class="w-full h-auto object-contain max-h-[600px] rounded-[16px] mx-auto" />
+                    <div class="mt-3 pt-3 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-2 px-1">
+                        <span class="font-mono text-[11px] text-ink-soft">Pamflet Resmi Acara</span>
+                        <a href="{{ $subEvent->poster_url }}" download="Pamflet-{{ Str::slug($subEvent->name) }}" 
+                           class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-ember hover:text-ember-dark transition-colors py-1 px-2.5 rounded-lg bg-ember/10 hover:bg-ember/20">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Unduh Pamflet (Story IG / WA)
+                        </a>
+                    </div>
                 </div>
             @endif
 

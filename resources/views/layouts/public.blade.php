@@ -28,7 +28,7 @@
     ];
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" prefix="og: https://ogp.me/ns#"
       x-data="{ 
           darkMode: localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
           canInstallPwa: false,
@@ -76,22 +76,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Open Graph / Facebook SEO -->
+    <!-- Open Graph / WhatsApp / Facebook / Instagram SEO -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request()->url() }}">
     <meta property="og:site_name" content="PARTI Himatif UMS">
     <meta property="og:title" content="@yield('og_title', 'PARTI Himatif UMS')">
     <meta property="og:description" content="@yield('og_description', 'Website PARTI Himatif UMS, platform informasi dan pendaftaran rangkaian acara HIMATIF UMS.')">
     <meta property="og:image" content="@yield('og_image', asset('logo.png'))">
+    <meta property="og:image:secure_url" content="@yield('og_image', asset('logo.png'))">
+    <meta property="og:image:type" content="@yield('og_image_type', 'image/png')">
+    <meta property="og:image:width" content="@yield('og_image_width', '600')">
+    <meta property="og:image:height" content="@yield('og_image_height', '600')">
+    <meta property="og:image:alt" content="@yield('og_title', 'PARTI Himatif UMS')">
 
     <!-- Twitter SEO -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ request()->url() }}">
-    <meta property="twitter:title" content="@yield('og_title', 'PARTI Himatif UMS')">
-    <meta property="twitter:description" content="@yield('og_description', 'Website PARTI Himatif UMS, platform informasi dan pendaftaran rangkaian acara HIMATIF UMS.')">
-    <meta property="twitter:image" content="@yield('og_image', asset('logo.png'))">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request()->url() }}">
+    <meta name="twitter:title" content="@yield('og_title', 'PARTI Himatif UMS')">
+    <meta name="twitter:description" content="@yield('og_description', 'Website PARTI Himatif UMS, platform informasi dan pendaftaran rangkaian acara HIMATIF UMS.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('logo.png'))">
     @if(config('parti.seo.twitter_handle'))
-    <meta property="twitter:site" content="{{ config('parti.seo.twitter_handle') }}">
+    <meta name="twitter:site" content="{{ config('parti.seo.twitter_handle') }}">
     @endif
 
     <!-- PWA Meta Tags -->

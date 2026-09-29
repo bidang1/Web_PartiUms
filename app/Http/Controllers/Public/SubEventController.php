@@ -49,4 +49,92 @@ class SubEventController extends Controller
 
         return response()->download($path, $safeFilename);
     }
+
+    /**
+     * Menyajikan thumbnail gambar Open Graph berukuran ringan (< 200KB) untuk preview WhatsApp & media sosial.
+     */
+    public function ogImage(string $slug)
+    {
+        // ponytail: Serve lightweight JPEG (< 200KB) so WhatsApp status, IG & crawlers unfurl properly without 300KB cutoff
+        $year = config('parti.active_year', 2026);
+        $subEvent = SubEvent::where('slug', $slug)
+            ->published()
+            ->notDeleted()
+            ->orderByRaw('CASE WHEN year = ? THEN 0 ELSE 1 END', [$year])
+            ->first();
+
+        $defaultLogo = public_path('logo.png');
+        if (!$subEvent || !$subEvent->poster_path) {
+            return file_exists($defaultLogo)
+                ? response()->file($defaultLogo, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=86400'])
+                : abort(404);
+        }
+
+        $filePath = storage_path('app/public/' . $subEvent->poster_path);
+        if (!file_exists($filePath)) {
+            $filePath = public_path('storage/' . $subEvent->poster_path);
+        }
+
+        if (!file_exists($filePath)) {
+            return file_exists($defaultLogo)
+                ? response()->file($defaultLogo, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=86400'])
+                : abort(404);
+        }
+
+        $cacheDir = storage_path('app/public/posters/og');
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0755, true);
+        }
+
+        $thumbName = 'og_' . md5($subEvent->poster_path . '_' . filemtime($filePath)) . '.jpg';
+        $thumbPath = $cacheDir . '/' . $thumbName;
+
+        if (file_exists($thumbPath)) {
+            return response()->file($thumbPath, [
+                'Content-Type' => 'image/jpeg',
+                'Cache-Control' => 'public, max-age=604800, immutable',
+            ]);
+        }
+
+        // Generate optimized OG image using native GD
+        if (extension_loaded('gd')) {
+            $info = @getimagesize($filePath);
+            if ($info) {
+                $src = match ($info['mime'] ?? '') {
+                    'image/jpeg', 'image/jpg' => @imagecreatefromjpeg($filePath),
+                    'image/png' => @imagecreatefrompng($filePath),
+                    'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($filePath) : null,
+                    default => null,
+                };
+
+                if ($src) {
+                    $origW = imagesx($src);
+                    $origH = imagesy($src);
+
+                    // Resize to max 800px width (optimal for WhatsApp mobile thumbnails & fast fetch)
+                    $targetW = min($origW, 800);
+                    $targetH = (int) round($origH * ($targetW / $origW));
+
+                    $thumb = imagecreatetruecolor($targetW, $targetH);
+                    $white = imagecolorallocate($thumb, 255, 255, 255);
+                    imagefilledrectangle($thumb, 0, 0, $targetW, $targetH, $white);
+                    imagecopyresampled($thumb, $src, 0, 0, 0, 0, $targetW, $targetH, $origW, $origH);
+
+                    if (@imagejpeg($thumb, $thumbPath, 80)) {
+                        imagedestroy($src);
+                        imagedestroy($thumb);
+                        return response()->file($thumbPath, [
+                            'Content-Type' => 'image/jpeg',
+                            'Cache-Control' => 'public, max-age=604800, immutable',
+                        ]);
+                    }
+
+                    imagedestroy($src);
+                    imagedestroy($thumb);
+                }
+            }
+        }
+
+        return response()->file($filePath);
+    }
 }

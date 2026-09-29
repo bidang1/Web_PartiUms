@@ -21,6 +21,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/tentang', [HomeController::class, 'about'])->name('about');
 Route::get('/faq', [PublicFaqController::class, 'index'])->name('faq');
 Route::get('/acara/{slug}', [PublicSubEventController::class, 'show'])->name('sub-event.show');
+Route::get('/acara/{slug}/og-image', [PublicSubEventController::class, 'ogImage'])->name('sub-event.og-image');
 Route::get('/dokumen/{document}/download', [PublicSubEventController::class, 'download'])->name('document.download');
 
 // Rute otentikasi
