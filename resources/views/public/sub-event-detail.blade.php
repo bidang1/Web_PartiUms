@@ -262,14 +262,7 @@
 
             <!-- Share Event Card (Zero Purple) -->
             <div class="ios-glass rounded-[24px] p-6 space-y-4 shadow-sm" x-data="{ copied: false }">
-                <div class="flex items-center justify-between">
-                    <h5 class="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-bold">Bagikan Acara</h5>
-                    @if($subEvent->poster_path)
-                    <a href="{{ $subEvent->poster_url }}" download="Pamflet-{{ Str::slug($subEvent->name) }}" class="font-mono text-[10px] text-ember hover:underline font-bold flex items-center gap-1">
-                        ↓ Unduh Pamflet
-                    </a>
-                    @endif
-                </div>
+                <h5 class="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-bold">Bagikan Acara</h5>
                 <p class="text-[13px] text-ink-soft leading-relaxed">
                     Ajak rekan satu tim-mu untuk mendaftar dengan membagikan tautan acara ini.
                 </p>
@@ -333,16 +326,6 @@
             @if($subEvent->poster_path)
                 <div class="ios-glass overflow-hidden rounded-[24px] p-4 transition-transform duration-500 hover:scale-[1.01]">
                     <img src="{{ $subEvent->poster_url }}" alt="Poster {{ $subEvent->name }}" class="w-full h-auto object-contain max-h-[600px] rounded-[16px] mx-auto" />
-                    <div class="mt-3 pt-3 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-2 px-1">
-                        <span class="font-mono text-[11px] text-ink-soft">Pamflet Resmi Acara</span>
-                        <a href="{{ $subEvent->poster_url }}" download="Pamflet-{{ Str::slug($subEvent->name) }}" 
-                           class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-ember hover:text-ember-dark transition-colors py-1 px-2.5 rounded-lg bg-ember/10 hover:bg-ember/20">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                            </svg>
-                            Unduh Pamflet (Story IG / WA)
-                        </a>
-                    </div>
                 </div>
             @endif
 
