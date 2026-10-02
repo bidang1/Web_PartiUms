@@ -79,46 +79,6 @@
             </div>
         </div>
 
-        <!-- Server Maintenance Tools -->
-        <div class="bg-white border border-line rounded-[6px] shadow-[0_4px_12px_rgba(28,20,11,0.02)]" x-data="{ results: {} }">
-            <div class="p-6 border-b border-line">
-                <h3 class="font-display font-bold text-base text-ink uppercase tracking-wide">Pemeliharaan Server</h3>
-                <p class="text-xs text-ink-soft/70 mt-1">Jalankan perintah pemeliharaan setelah deploy kode baru.</p>
-            </div>
-            <div class="p-6 flex flex-wrap gap-3">
-                <template x-for="action in [
-                    { key: 'migrate', url: '{{ route('admin.maintenance.migrate') }}', label: 'Jalankan Migration', icon: '🗃️' },
-                    { key: 'cache', url: '{{ route('admin.maintenance.clear-cache') }}', label: 'Bersihkan Cache', icon: '🧹' },
-                    { key: 'symlink', url: '{{ route('admin.maintenance.symlink') }}', label: 'Buat Storage Link', icon: '🔗' },
-                ]" :key="action.key">
-                    <button type="button"
-                        @click="
-                            results[action.key] = { loading: true };
-                            fetch(action.url, { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } })
-                                .then(r => r.json())
-                                .then(d => results[action.key] = d)
-                                .catch(e => results[action.key] = { status: 'error', message: e.message })
-                        "
-                        :disabled="results[action.key]?.loading"
-                        class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-[3px] border border-line bg-paper-warm/30 hover:bg-paper-warm hover:border-ember/30 transition-colors disabled:opacity-50">
-                        <span x-text="action.icon"></span>
-                        <span x-text="results[action.key]?.loading ? 'Memproses...' : action.label"></span>
-                    </button>
-                </template>
-            </div>
-            <template x-if="Object.values(results).some(r => r.message)">
-                <div class="px-6 pb-4 space-y-1">
-                    <template x-for="(result, key) in results" :key="key">
-                        <template x-if="result.message && !result.loading">
-                            <div class="font-mono text-[11px] px-3 py-2 rounded-[2px] border"
-                                 :class="result.status === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'"
-                                 x-text="result.message"></div>
-                        </template>
-                    </template>
-                </div>
-            </template>
-        </div>
-
     @else
         <!-- KESEKRETARIATAN Quick Welcome & Guidance -->
         <div class="bg-white border border-line rounded-[6px] p-6 md:p-8 shadow-[0_4px_12px_rgba(28,20,11,0.02)] space-y-6">

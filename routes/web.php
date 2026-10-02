@@ -50,7 +50,6 @@ Route::middleware(['auth', 'force.password.change'])
         // Manajemen Link Pendaftaran Event
         Route::get('/registration-links', [RegistrationLinkController::class, 'index'])->name('registration-links.index');
         Route::put('/registration-links/{subEvent}', [RegistrationLinkController::class, 'update'])->name('registration-links.update');
-        Route::put('/registration-links/{subEvent}/toggle', [RegistrationLinkController::class, 'toggleRegistration'])->name('registration-links.toggle');
 
         // Rute khusus Superadmin
         Route::middleware('role:SUPERADMIN')->group(function () {
@@ -121,19 +120,7 @@ Route::middleware(['auth', 'force.password.change'])
                         return response()->json(['status' => 'error', 'message' => 'Gagal membersihkan cache aplikasi.'], 500);
                     }
                 })->name('maintenance.clear-cache');
-
-                Route::post('run-migrate', function () {
-                    try {
-                        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-                        $output = \Illuminate\Support\Facades\Artisan::output();
-                        return response()->json(['status' => 'success', 'message' => 'Migration berhasil dijalankan.', 'output' => $output]);
-                    } catch (\Throwable $e) {
-                        \Illuminate\Support\Facades\Log::error('Failed to run migrations: ' . $e->getMessage());
-                        return response()->json(['status' => 'error', 'message' => 'Gagal menjalankan migration: ' . $e->getMessage()], 500);
-                    }
-                })->name('maintenance.migrate');
             });
-
         });
     });
 
