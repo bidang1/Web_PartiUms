@@ -1,0 +1,35 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/public_html
+
+            # Pull latest dari branch main
+            git pull origin main
+
+            # Install PHP dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction 2>&1
+
+            # Jalankan migration
+            php artisan migrate --force 2>&1
+
+            # Bersihkan cache
+            php artisan config:clear 2>&1
+            php artisan view:clear 2>&1
+            php artisan route:clear 2>&1
+
+            echo "Deploy selesai: $(date)"

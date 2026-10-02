@@ -37,5 +37,24 @@ class RegistrationLinkController extends Controller
 
         return redirect()->back()->with('success', 'Tautan pendaftaran untuk ' . $subEvent->name . ' berhasil diperbarui.');
     }
+
+    public function toggleRegistration(SubEvent $subEvent)
+    {
+        $subEvent->update([
+            'is_registration_open' => !$subEvent->is_registration_open,
+        ]);
+
+        $state = $subEvent->is_registration_open ? 'dibuka' : 'ditutup';
+
+        AuditLog::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'action' => "Pendaftaran sub acara \"{$subEvent->name}\" {$state}",
+            'entity_type' => 'SubEvent',
+            'entity_id' => $subEvent->id,
+        ]);
+
+        return redirect()->back()->with('success', "Pendaftaran {$subEvent->name} berhasil {$state}.");
+    }
 }
+
 

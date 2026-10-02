@@ -50,6 +50,7 @@ Route::middleware(['auth', 'force.password.change'])
         // Manajemen Link Pendaftaran Event
         Route::get('/registration-links', [RegistrationLinkController::class, 'index'])->name('registration-links.index');
         Route::put('/registration-links/{subEvent}', [RegistrationLinkController::class, 'update'])->name('registration-links.update');
+        Route::put('/registration-links/{subEvent}/toggle', [RegistrationLinkController::class, 'toggleRegistration'])->name('registration-links.toggle');
 
         // Rute khusus Superadmin
         Route::middleware('role:SUPERADMIN')->group(function () {

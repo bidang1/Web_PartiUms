@@ -40,6 +40,22 @@
                                 Belum pernah diperbarui.
                             </div>
                         @endif
+
+                        <!-- Toggle Buka/Tutup Pendaftaran -->
+                        <form method="POST" action="{{ route('admin.registration-links.toggle', $subEvent) }}" class="pt-3"
+                              onsubmit="return confirm('{{ $subEvent->is_registration_open ? 'Tutup pendaftaran untuk ' . $subEvent->name . '?' : 'Buka kembali pendaftaran untuk ' . $subEvent->name . '?' }}')">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-[3px] border transition-colors {{ $subEvent->is_registration_open ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' }}">
+                                @if($subEvent->is_registration_open)
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                    Pendaftaran Buka
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                    Pendaftaran Ditutup
+                                @endif
+                            </button>
+                        </form>
                     </div>
 
                     <!-- Right: Form Update Link -->
