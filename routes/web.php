@@ -121,7 +121,19 @@ Route::middleware(['auth', 'force.password.change'])
                         return response()->json(['status' => 'error', 'message' => 'Gagal membersihkan cache aplikasi.'], 500);
                     }
                 })->name('maintenance.clear-cache');
+
+                Route::post('run-migrate', function () {
+                    try {
+                        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                        $output = \Illuminate\Support\Facades\Artisan::output();
+                        return response()->json(['status' => 'success', 'message' => 'Migration berhasil dijalankan.', 'output' => $output]);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('Failed to run migrations: ' . $e->getMessage());
+                        return response()->json(['status' => 'error', 'message' => 'Gagal menjalankan migration: ' . $e->getMessage()], 500);
+                    }
+                })->name('maintenance.migrate');
             });
+
         });
     });
 
