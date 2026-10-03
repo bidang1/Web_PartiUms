@@ -8,6 +8,8 @@ use App\Models\Sponsor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -56,22 +58,35 @@ class SponsorController extends Controller
         $year = session('active_year', config('parti.active_year', 2026));
         $logoPath = $request->file('logo')->store('sponsors', 'public');
 
-        $sponsor = Sponsor::create([
-            'year' => $year,
-            'name' => $validated['name'],
-            'logo_path' => $logoPath,
-            'website_url' => $validated['website_url'],
-            'tier' => $validated['tier'],
-            'order' => $validated['order'],
-            'is_active' => $request->has('is_active'),
-        ]);
+        try {
+            DB::beginTransaction();
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'Menambahkan sponsor baru: ' . $sponsor->name . ' (' . $sponsor->tier . ')',
-            'entity_type' => 'Sponsor',
-            'entity_id' => $sponsor->id,
-        ]);
+            $sponsor = Sponsor::create([
+                'year' => $year,
+                'name' => $validated['name'],
+                'logo_path' => $logoPath,
+                'website_url' => $validated['website_url'],
+                'tier' => $validated['tier'],
+                'order' => $validated['order'],
+                'is_active' => $request->has('is_active'),
+            ]);
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'Menambahkan sponsor baru: ' . $sponsor->name . ' (' . $sponsor->tier . ')',
+                'entity_type' => 'Sponsor',
+                'entity_id' => $sponsor->id,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            Log::error('Failed to create sponsor: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menambahkan sponsor: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.sponsors.index')->with('success', 'Sponsor berhasil ditambahkan.');
     }
@@ -105,21 +120,41 @@ class SponsorController extends Controller
             'is_active' => $request->has('is_active'),
         ];
 
+        $oldLogo = null;
+        $newLogo = null;
         if ($request->hasFile('logo')) {
-            if (Storage::disk('public')->exists($sponsor->logo_path)) {
-                Storage::disk('public')->delete($sponsor->logo_path);
-            }
-            $data['logo_path'] = $request->file('logo')->store('sponsors', 'public');
+            $oldLogo = $sponsor->logo_path;
+            $newLogo = $request->file('logo')->store('sponsors', 'public');
+            $data['logo_path'] = $newLogo;
         }
 
-        $sponsor->update($data);
+        try {
+            DB::beginTransaction();
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'Mengubah detail sponsor: ' . $sponsor->name,
-            'entity_type' => 'Sponsor',
-            'entity_id' => $sponsor->id,
-        ]);
+            $sponsor->update($data);
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'Mengubah detail sponsor: ' . $sponsor->name,
+                'entity_type' => 'Sponsor',
+                'entity_id' => $sponsor->id,
+            ]);
+
+            DB::commit();
+
+            // Delete old logo only after transaction succeeds
+            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                Storage::disk('public')->delete($oldLogo);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Delete newly uploaded logo if transaction failed
+            if ($newLogo && Storage::disk('public')->exists($newLogo)) {
+                Storage::disk('public')->delete($newLogo);
+            }
+            Log::error('Failed to update sponsor: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memperbarui sponsor: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.sponsors.index')->with('success', 'Sponsor berhasil diperbarui.');
     }

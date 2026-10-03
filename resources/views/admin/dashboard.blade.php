@@ -61,7 +61,9 @@
                 @forelse($recentLogs as $log)
                     <div class="p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3 text-left">
                         <div class="flex items-start gap-3">
-                            <span class="text-lg">📝</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ember shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                             <div>
                                 <p class="text-sm font-semibold text-ink">{{ $log->action }}</p>
                                 <p class="text-xs text-ink-soft/70 mt-0.5">Oleh <span class="font-medium">{{ $log->user?->name ?? 'Sistem / Pengguna Dihapus' }}</span> ({{ $log->user?->role ?? '-' }})</p>
@@ -79,6 +81,45 @@
             </div>
         </div>
 
+        <!-- Server Maintenance Tools (Superadmin) -->
+        <div class="bg-white border border-line rounded-[6px] shadow-[0_4px_12px_rgba(28,20,11,0.02)]">
+            <div class="p-6 border-b border-line">
+                <h3 class="font-display font-bold text-base text-ink uppercase tracking-wide">Pemeliharaan Server & Database</h3>
+                <p class="text-xs text-ink-soft/70 mt-1">Jalankan perintah pemeliharaan langsung setelah deploy kode baru ke hosting.</p>
+            </div>
+            <div class="p-6 flex flex-wrap items-center gap-3">
+                <form method="POST" action="{{ route('admin.maintenance.migrate') }}" onsubmit="return confirm('Jalankan database migration sekarang?')">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-[3px] border border-ember/30 bg-ember/10 text-ember-dark hover:bg-ember hover:text-white transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                        </svg>
+                        <span>Jalankan Database Migration</span>
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ route('admin.maintenance.clear-cache') }}" onsubmit="return confirm('Bersihkan seluruh cache aplikasi?')">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-[3px] border border-line bg-paper-warm/40 text-ink hover:bg-paper-warm hover:border-ink/20 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Bersihkan Cache</span>
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ route('admin.maintenance.symlink') }}" onsubmit="return confirm('Buat storage link symlink?')">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-[3px] border border-line bg-paper-warm/40 text-ink hover:bg-paper-warm hover:border-ink/20 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span>Buat Storage Link</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
     @else
         <!-- KESEKRETARIATAN Quick Welcome & Guidance -->
         <div class="bg-white border border-line rounded-[6px] p-6 md:p-8 shadow-[0_4px_12px_rgba(28,20,11,0.02)] space-y-6">
@@ -87,7 +128,12 @@
                 <p>Halo, Panitia Kesekretariatan. Tugas utama Anda di sistem ini adalah memperbarui tautan Google Form pendaftaran per sub-acara yang sudah dipersiapkan oleh Superadmin.</p>
                 
                 <div class="bg-[#FAF6EE] border border-line p-4 rounded-[2px] space-y-2">
-                    <p class="font-semibold text-ember-dark flex items-center gap-1.5">📌 Petunjuk Pengisian Link:</p>
+                    <p class="font-semibold text-ember-dark flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-ember" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Petunjuk Pengisian Link:</span>
+                    </p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li>Pastikan tautan pendaftaran menggunakan domain resmi Google Form seperti <code class="font-mono bg-white px-1 py-0.5 border border-line rounded">docs.google.com/forms</code> atau <code class="font-mono bg-white px-1 py-0.5 border border-line rounded">forms.gle</code>.</li>
                         <li>Jika link pendaftaran sengaja dikosongkan, tombol pendaftaran di sisi publik otomatis akan berlabel <strong>"Segera Dibuka"</strong>.</li>

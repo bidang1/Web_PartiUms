@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\SubEvent;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SubEventController extends Controller
@@ -59,30 +61,43 @@ class SubEventController extends Controller
             $posterPath = $request->file('poster')->store('posters', 'public');
         }
 
-        $subEvent = SubEvent::create([
-            'year' => $year,
-            'name' => $validated['name'],
-            'tagline' => $validated['tagline'],
-            'description' => $validated['description'],
-            'date_start' => $validated['date_start'],
-            'date_end' => $validated['date_end'],
-            'pj_names' => $pjNames,
-            'htm_tiers' => $htmTiers,
-            'status' => 'DRAFT',
-            'order' => $validated['order'],
-            'is_deleted' => false,
-            'type' => $validated['type'],
-            'location' => $validated['location'],
-            'poster_path' => $posterPath,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Audit Log
-        AuditLog::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'action' => 'Membuat sub acara baru: ' . $subEvent->name,
-            'entity_type' => 'SubEvent',
-            'entity_id' => $subEvent->id,
-        ]);
+            $subEvent = SubEvent::create([
+                'year' => $year,
+                'name' => $validated['name'],
+                'tagline' => $validated['tagline'],
+                'description' => $validated['description'],
+                'date_start' => $validated['date_start'],
+                'date_end' => $validated['date_end'],
+                'pj_names' => $pjNames,
+                'htm_tiers' => $htmTiers,
+                'status' => 'DRAFT',
+                'order' => $validated['order'],
+                'is_deleted' => false,
+                'type' => $validated['type'],
+                'location' => $validated['location'],
+                'poster_path' => $posterPath,
+            ]);
+
+            // Audit Log
+            AuditLog::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => 'Membuat sub acara baru: ' . $subEvent->name,
+                'entity_type' => 'SubEvent',
+                'entity_id' => $subEvent->id,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($posterPath && Storage::disk('public')->exists($posterPath)) {
+                Storage::disk('public')->delete($posterPath);
+            }
+            Log::error('Failed to create sub event: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menambahkan sub acara: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.sub-events.index')->with('success', 'Sub acara berhasil ditambahkan.');
     }
@@ -160,25 +175,42 @@ class SubEventController extends Controller
             'location' => $validated['location'],
         ];
 
+        $oldPoster = null;
+        $newPoster = null;
         if ($request->hasFile('poster')) {
-            // Delete old file
-            if ($subEvent->poster_path && Storage::disk('public')->exists($subEvent->poster_path)) {
-                Storage::disk('public')->delete($subEvent->poster_path);
-            }
-
-            // Save new file
-            $data['poster_path'] = $request->file('poster')->store('posters', 'public');
+            $oldPoster = $subEvent->poster_path;
+            $newPoster = $request->file('poster')->store('posters', 'public');
+            $data['poster_path'] = $newPoster;
         }
 
-        $subEvent->update($data);
+        try {
+            DB::beginTransaction();
 
-        // Audit Log
-        AuditLog::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'action' => 'Mengubah detail sub acara: ' . $subEvent->name,
-            'entity_type' => 'SubEvent',
-            'entity_id' => $subEvent->id,
-        ]);
+            $subEvent->update($data);
+
+            // Audit Log
+            AuditLog::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => 'Mengubah detail sub acara: ' . $subEvent->name,
+                'entity_type' => 'SubEvent',
+                'entity_id' => $subEvent->id,
+            ]);
+
+            DB::commit();
+
+            // Delete old poster only after transaction succeeds
+            if ($oldPoster && Storage::disk('public')->exists($oldPoster)) {
+                Storage::disk('public')->delete($oldPoster);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Delete new poster if transaction failed
+            if ($newPoster && Storage::disk('public')->exists($newPoster)) {
+                Storage::disk('public')->delete($newPoster);
+            }
+            Log::error('Failed to update sub event: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memperbarui sub acara: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.sub-events.index')->with('success', 'Sub acara berhasil diperbarui.');
     }

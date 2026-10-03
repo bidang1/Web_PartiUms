@@ -27,7 +27,11 @@ Thumbs.db
 
 graphify-out/
 scratch/
-.phpunit.result.cache
+.graphifyignore
+.agent/
+.agents/
+parti2026/
+*.zip
 
 # Database Files
 database/*.sqlite

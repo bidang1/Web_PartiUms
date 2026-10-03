@@ -7,6 +7,8 @@ use App\Models\SubEvent;
 use App\Models\SubEventDocument;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
@@ -35,23 +37,36 @@ class DocumentController extends Controller
 
         $path = $file->store('documents', 'public');
 
-        $document = $subEvent->documents()->create([
-            'label' => $validated['label'],
-            'file_path' => $path,
-            'file_type' => $extension,
-            'file_size_bytes' => $file->getSize(),
-            'order' => $validated['order'],
-            'uploaded_by' => \Illuminate\Support\Facades\Auth::id(),
-            'uploaded_at' => now(),
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Audit Log
-        AuditLog::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'action' => 'Mengunggah dokumen template "' . $document->label . '" untuk sub acara "' . $subEvent->name . '"',
-            'entity_type' => 'SubEventDocument',
-            'entity_id' => $document->id,
-        ]);
+            $document = $subEvent->documents()->create([
+                'label' => $validated['label'],
+                'file_path' => $path,
+                'file_type' => $extension,
+                'file_size_bytes' => $file->getSize(),
+                'order' => $validated['order'],
+                'uploaded_by' => \Illuminate\Support\Facades\Auth::id(),
+                'uploaded_at' => now(),
+            ]);
+
+            // Audit Log
+            AuditLog::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => 'Mengunggah dokumen template "' . $document->label . '" untuk sub acara "' . $subEvent->name . '"',
+                'entity_type' => 'SubEventDocument',
+                'entity_id' => $document->id,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+            Log::error('Failed to upload document: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal mengunggah dokumen template: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Dokumen template berhasil diunggah.');
     }
@@ -72,11 +87,10 @@ class DocumentController extends Controller
             'order' => $validated['order'],
         ];
 
+        $oldFile = null;
+        $newFile = null;
         if ($request->hasFile('file')) {
-            // Delete old file
-            if (Storage::disk('public')->exists($document->file_path)) {
-                Storage::disk('public')->delete($document->file_path);
-            }
+            $oldFile = $document->file_path;
 
             // Save new file
             $file = $request->file('file');
@@ -84,43 +98,74 @@ class DocumentController extends Controller
                 ? strtolower($file->extension()) 
                 : (in_array(strtolower($file->getClientOriginalExtension()), config('parti.allowed_file_types', ['pdf', 'docx'])) ? strtolower($file->getClientOriginalExtension()) : 'pdf');
 
-            $data['file_path'] = $file->store('documents', 'public');
+            $newFile = $file->store('documents', 'public');
+            $data['file_path'] = $newFile;
             $data['file_type'] = $extension;
             $data['file_size_bytes'] = $file->getSize();
             $data['uploaded_by'] = \Illuminate\Support\Facades\Auth::id();
             $data['uploaded_at'] = now();
         }
 
-        $document->update($data);
+        try {
+            DB::beginTransaction();
 
-        $subEventName = $document->subEvent?->name ?? 'Sub Acara';
+            $document->update($data);
 
-        AuditLog::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'action' => 'Memperbarui dokumen template "' . $document->label . '" pada sub acara "' . $subEventName . '"',
-            'entity_type' => 'SubEventDocument',
-            'entity_id' => $document->id,
-        ]);
+            $subEventName = $document->subEvent?->name ?? 'Sub Acara';
+
+            AuditLog::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => 'Memperbarui dokumen template "' . $document->label . '" pada sub acara "' . $subEventName . '"',
+                'entity_type' => 'SubEventDocument',
+                'entity_id' => $document->id,
+            ]);
+
+            DB::commit();
+
+            // Delete old file only after transaction succeeds
+            if ($oldFile && Storage::disk('public')->exists($oldFile)) {
+                Storage::disk('public')->delete($oldFile);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Delete newly uploaded file if transaction failed
+            if ($newFile && Storage::disk('public')->exists($newFile)) {
+                Storage::disk('public')->delete($newFile);
+            }
+            Log::error('Failed to update document: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memperbarui dokumen template: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Dokumen template berhasil diperbarui.');
     }
 
     public function destroy(SubEventDocument $document)
     {
-        if (Storage::disk('public')->exists($document->file_path)) {
-            Storage::disk('public')->delete($document->file_path);
-        }
-
+        $filePath = $document->file_path;
         $subEventName = $document->subEvent?->name ?? 'Sub Acara';
 
-        AuditLog::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'action' => 'Menghapus dokumen template "' . $document->label . '" dari sub acara "' . $subEventName . '"',
-            'entity_type' => 'SubEventDocument',
-            'entity_id' => $document->id,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $document->delete();
+            AuditLog::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => 'Menghapus dokumen template "' . $document->label . '" dari sub acara "' . $subEventName . '"',
+                'entity_type' => 'SubEventDocument',
+                'entity_id' => $document->id,
+            ]);
+
+            $document->delete();
+
+            DB::commit();
+
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to delete document: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus dokumen template: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Dokumen template berhasil dihapus.');
     }

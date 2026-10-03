@@ -72,28 +72,49 @@
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             <!-- Common Main Dashboard -->
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                <span class="text-[16px]">📊</span> Dashboard
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                </svg>
+                <span>Dashboard</span>
             </a>
 
             @if(auth()->user()->role === 'SUPERADMIN')
                 <!-- SUPERADMIN Menu -->
                 <a href="{{ route('admin.sub-events.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.sub-events.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">🏆</span> Sub Acara
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                    <span>Sub Acara</span>
                 </a>
                 <a href="{{ route('admin.timeline.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.timeline.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">📅</span> Timeline
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Timeline</span>
                 </a>
                 <a href="{{ route('admin.sponsors.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.sponsors.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">🤝</span> Sponsor
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                    </svg>
+                    <span>Sponsor</span>
                 </a>
                 <a href="{{ route('admin.faqs.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.faqs.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">❓</span> Manajemen FAQ
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Manajemen FAQ</span>
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">👤</span> Kesekretariatan
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>Kesekretariatan</span>
                 </a>
                 <a href="{{ route('admin.audit-log.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.audit-log.index') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                    <span class="text-[16px]">📝</span> Audit Log
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Audit Log</span>
                 </a>
             @endif
 
@@ -102,10 +123,16 @@
             <span class="block px-4 font-mono text-[9px] tracking-widest uppercase text-ink-soft/50 font-bold mb-2">Tugas Harian</span>
 
             <a href="{{ route('admin.registration-links.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.registration-links.*') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                <span class="text-[16px]">🔗</span> Link Pendaftaran
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                </svg>
+                <span>Link Pendaftaran</span>
             </a>
             <a href="{{ route('admin.change-password') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-sm font-medium transition-colors {{ request()->routeIs('admin.change-password') ? 'bg-ember/10 text-ember font-semibold' : 'text-ink-soft hover:bg-paper-warm hover:text-ink' }}">
-                <span class="text-[16px]">🔑</span> Ganti Password
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                </svg>
+                <span>Ganti Password</span>
             </a>
         </nav>
 

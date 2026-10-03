@@ -50,6 +50,7 @@ Route::middleware(['auth', 'force.password.change'])
         // Manajemen Link Pendaftaran Event
         Route::get('/registration-links', [RegistrationLinkController::class, 'index'])->name('registration-links.index');
         Route::put('/registration-links/{subEvent}', [RegistrationLinkController::class, 'update'])->name('registration-links.update');
+        Route::put('/registration-links/{subEvent}/toggle', [RegistrationLinkController::class, 'toggleRegistration'])->name('registration-links.toggle');
 
         // Rute khusus Superadmin
         Route::middleware('role:SUPERADMIN')->group(function () {
@@ -101,10 +102,16 @@ Route::middleware(['auth', 'force.password.change'])
                             }
                         }
 
-                        return response()->json(['status' => 'success', 'message' => 'Storage symlink created successfully!']);
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'success', 'message' => 'Storage symlink created successfully!']);
+                        }
+                        return back()->with('success', 'Storage symlink berhasil dibuat!');
                     } catch (\Throwable $e) {
                         \Illuminate\Support\Facades\Log::error('Failed to create storage symlink: ' . $e->getMessage());
-                        return response()->json(['status' => 'error', 'message' => 'Gagal membuat tautan storage.'], 500);
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'error', 'message' => 'Gagal membuat tautan storage.'], 500);
+                        }
+                        return back()->with('error', 'Gagal membuat tautan storage: ' . $e->getMessage());
                     }
                 })->name('maintenance.symlink');
 
@@ -114,12 +121,37 @@ Route::middleware(['auth', 'force.password.change'])
                         \Illuminate\Support\Facades\Artisan::call('cache:clear');
                         \Illuminate\Support\Facades\Artisan::call('view:clear');
                         \Illuminate\Support\Facades\Artisan::call('route:clear');
-                        return response()->json(['status' => 'success', 'message' => 'Semua cache berhasil dibersihkan!']);
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'success', 'message' => 'Semua cache berhasil dibersihkan!']);
+                        }
+                        return back()->with('success', 'Semua cache aplikasi berhasil dibersihkan!');
                     } catch (\Throwable $e) {
                         \Illuminate\Support\Facades\Log::error('Failed to clear caches: ' . $e->getMessage());
-                        return response()->json(['status' => 'error', 'message' => 'Gagal membersihkan cache aplikasi.'], 500);
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'error', 'message' => 'Gagal membersihkan cache aplikasi.'], 500);
+                        }
+                        return back()->with('error', 'Gagal membersihkan cache aplikasi: ' . $e->getMessage());
                     }
                 })->name('maintenance.clear-cache');
+
+                Route::post('run-migrate', function () {
+                    try {
+                        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+                        \Illuminate\Support\Facades\Cache::forget('schema_sub_events_has_reg_open');
+                        $message = $output ? "Migration berhasil dijalankan:\n" . $output : 'Migration berhasil dijalankan (database sudah up-to-date).';
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'success', 'message' => $message]);
+                        }
+                        return back()->with('success', $message);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('Failed to run migrations: ' . $e->getMessage());
+                        if (request()->wantsJson()) {
+                            return response()->json(['status' => 'error', 'message' => 'Gagal menjalankan migration: ' . $e->getMessage()], 500);
+                        }
+                        return back()->with('error', 'Gagal menjalankan migration: ' . $e->getMessage());
+                    }
+                })->name('maintenance.migrate');
             });
         });
     });

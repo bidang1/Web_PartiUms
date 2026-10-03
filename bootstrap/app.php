@@ -21,6 +21,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Handle CSRF Token Mismatch (Error 419) gracefully
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Sesi keamanan telah berakhir. Silakan muat ulang halaman.'], 419);
+            }
+            return redirect()->back()->withInput()->with('error', 'Sesi formulir Anda telah diperbarui. Silakan kirimkan kembali data Anda.');
+        });
     })->create();
 
 // Ensure public_path() points to the project root for flat-root Hostinger deployment

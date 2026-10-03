@@ -28,6 +28,7 @@ class SubEvent extends Model
         'gform_updated_by',
         'gform_updated_at',
         'status',
+        'is_registration_open',
         'order',
         'is_deleted',
         'type',
@@ -50,6 +51,7 @@ class SubEvent extends Model
             'gform_updated_at' => 'datetime',
             'order' => 'integer',
             'is_deleted' => 'boolean',
+            'is_registration_open' => 'boolean',
         ];
     }
 
@@ -146,7 +148,8 @@ class SubEvent extends Model
      */
     public function getRegistrationButtonStateAttribute(): string
     {
-        if ($this->status === 'CLOSED') {
+        // ponytail: is_registration_open decouples registration toggle from event visibility
+        if ($this->status === 'CLOSED' || $this->is_registration_open === false) {
             return 'closed';
         }
 

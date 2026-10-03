@@ -40,6 +40,24 @@
                                 Belum pernah diperbarui.
                             </div>
                         @endif
+
+                        <!-- Toggle Buka/Tutup Pendaftaran -->
+                        <div class="pt-3">
+                            <form method="POST" action="{{ route('admin.registration-links.toggle', $subEvent) }}"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin {{ ($subEvent->is_registration_open ?? true) ? 'menutup' : 'membuka kembali' }} pendaftaran untuk sub acara {{ $subEvent->name }}?')">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-[3px] border transition-colors cursor-pointer {{ ($subEvent->is_registration_open ?? true) ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100' }}">
+                                    @if($subEvent->is_registration_open ?? true)
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span>Status: Pendaftaran Dibuka (Klik untuk Tutup)</span>
+                                    @else
+                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                        <span>Status: Pendaftaran Ditutup (Klik untuk Buka)</span>
+                                    @endif
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Right: Form Update Link -->
@@ -91,8 +109,10 @@
                             @if(is_array($subEvent->gform_link) && count($subEvent->gform_link) > 0)
                                 <div class="text-[11px] flex flex-col gap-1 mt-3 border-t border-line/50 pt-2">
                                     @foreach($subEvent->gform_link as $link)
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-emerald-600">🔗</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
                                             <span class="font-semibold text-ink-soft">{{ $link['label'] ?? 'Link' }}:</span>
                                             <a href="{{ $link['url'] ?? '#' }}" target="_blank" rel="noopener noreferrer" class="text-ink-soft hover:text-ember underline truncate block max-w-sm sm:max-w-md font-mono">
                                                 {{ $link['url'] ?? '' }}
@@ -101,8 +121,10 @@
                                     @endforeach
                                 </div>
                             @else
-                                <div class="text-[11px] text-amber-600 flex items-center gap-1 font-mono mt-2">
-                                    <span>⏳</span>
+                                <div class="text-[11px] text-amber-600 flex items-center gap-1.5 font-mono mt-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                     <span>Tautan kosong. Tombol di web publik akan berstatus "Segera Dibuka".</span>
                                 </div>
                             @endif
